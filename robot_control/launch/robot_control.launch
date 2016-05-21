@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<launch>
+
+  <node name="robot_control" pkg="robot_control" type="robot_control_node" output="screen">
+    <param name="mass"          type="double"           value="1.0"/>
+    <param name="inertia"       type="double"           value="1.0"/>
+    <param name="freq"          type="double"           value="100.0"/>
+    <param name="max_force"     type="double"           value="1.0"/>
+    <param name="max_torque"    type="double"           value="1.0"/>
+    <param name="pos_p"         type="double"           value="1.0"/>
+    <param name="pos_i"         type="double"           value="0.001"/>
+    <param name="pos_d"         type="double"           value="2.0"/>
+    <param name="ori_p"         type="double"           value="1.0"/>
+    <param name="ori_i"         type="double"           value="0.0"/>
+    <param name="ori_d"         type="double"           value="1.0"/>
+  </node>
+
+</launch>
