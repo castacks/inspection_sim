@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include <tf/tf.h>
 #include <geometry_msgs/Pose.h>
+#include <sensor_msgs/Imu.h>
 #include <gazebo_msgs/ModelState.h>
 
 #include <gazebo_msgs/ModelStates.h>
@@ -19,6 +20,7 @@ public:
     void update_control();
     void update_state();
     void publish_state();
+    void publish_imu();
     bool check_reach();
 private:
 
@@ -37,6 +39,8 @@ private:
     tf::Vector3 _angular_acceleration;
     tf::Vector3 _angular_velocity;
     tf::Vector3 _orientation;
+    tf::Quaternion _quaternion;
+
     tf::Vector3 _target_position;
     tf::Vector3 _target_orientation;
 
@@ -52,7 +56,9 @@ private:
     double _MAX_FORCE, _MAX_TORQUE;
 
     ros::Subscriber _pose_sub, _target_sub;
-    ros::Publisher  _model_pub;
+    ros::Publisher  _model_pub, _imu_pub;
+
+    double _gravity;
 
 };
 #endif // ROBOT_H

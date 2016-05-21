@@ -17,6 +17,7 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
     nh.param("ori_p",       _ori_p,         1.0);
     nh.param("ori_i",       _ori_i,         0.0);
     nh.param("ori_d",       _ori_d,         1.0);
+    nh.param("gravity",     _gravity,       9.8);
 
 
     _init_time = true;
@@ -38,6 +39,7 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
     _target_sub = nh.subscribe("/dji_sim/target_pose", 100, &RobotControl::target_callback, this);
 
     _model_pub = nh.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 10);
+    _imu_pub   = nh.advertise<sensor_msgs::Imu>("/dji_sim/imu", 100);
 }
 
 void RobotControl::target_callback(const geometry_msgs::Pose::Ptr msg)
@@ -68,6 +70,7 @@ void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
             update_control();
             update_state();
             publish_state();
+            publish_imu();
         }
     }
 
@@ -153,12 +156,52 @@ void RobotControl::publish_state()
     msg.pose.position.z = _position.z();
 
     tf::Quaternion q;
-    q.setRPY(_orientation[0], _orientation[1], _orientation[2]);
-    msg.pose.orientation.w = q.w();
-    msg.pose.orientation.x = q.x();
-    msg.pose.orientation.y = q.y();
-    msg.pose.orientation.z = q.z();
+    _quaternion.setRPY(_orientation[0], _orientation[1], _orientation[2]);
+    msg.pose.orientation.w = _quaternion.w();
+    msg.pose.orientation.x = _quaternion.x();
+    msg.pose.orientation.y = _quaternion.y();
+    msg.pose.orientation.z = _quaternion.z();
 
     _model_pub.publish(msg);
 }
 
+void RobotControl::publish_imu()
+{
+    tf::Vector3 gravity_vector(0.0, 0.0, -_gravity);
+
+    tf::Matrix3x3 rot_gazebo_to_dji;
+    tf::Matrix3x3 rot_dji_to_base;
+    tf::Matrix3x3 rot_gazebo_to_base;
+
+    rot_gazebo_to_dji.setRotation(_quaternion);
+    rot_dji_to_base.setRPY(M_PI, 0.0, 0.0);
+    rot_gazebo_to_base = rot_gazebo_to_dji * rot_dji_to_base;
+
+    tf::Vector3 imu_accelerometer(0.0, 0.0, 0.0);
+    tf::Vector3 imu_gyroscope(0.0, 0.0, 0.0);
+    tf::Quaternion imu_quaternion;
+
+    imu_accelerometer = rot_gazebo_to_base.transpose() * (_linear_acceleration + gravity_vector);
+    imu_gyroscope     = rot_gazebo_to_base.transpose() * _angular_velocity;
+    rot_gazebo_to_base.getRotation(imu_quaternion);
+    sensor_msgs::Imu msg;
+
+    msg.header.frame_id = "base_link";
+    msg.header.stamp = ros::Time::now();
+
+    msg.angular_velocity.x = imu_gyroscope.x();
+    msg.angular_velocity.y = imu_gyroscope.y();
+    msg.angular_velocity.z = imu_gyroscope.z();
+
+    msg.linear_acceleration.x = imu_accelerometer.x();
+    msg.linear_acceleration.y = imu_accelerometer.y();
+    msg.linear_acceleration.z = imu_accelerometer.z();
+
+    msg.orientation.w = imu_quaternion.w();
+    msg.orientation.x = imu_quaternion.x();
+    msg.orientation.y = imu_quaternion.y();
+    msg.orientation.z = imu_quaternion.z();
+
+    _imu_pub.publish(msg);
+
+}
