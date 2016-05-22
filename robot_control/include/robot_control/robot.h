@@ -1,13 +1,18 @@
 #ifndef ROBOT_H
 #define ROBOT_H
 
+#include <queue>
 #include <ros/ros.h>
 #include <tf/tf.h>
 #include <geometry_msgs/Pose.h>
 #include <sensor_msgs/Imu.h>
 #include <gazebo_msgs/ModelState.h>
-
 #include <gazebo_msgs/ModelStates.h>
+#include "boost/random.hpp"
+#include "boost/random/normal_distribution.hpp"
+
+typedef boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > ND_GEN;
+
 class RobotControl {
 
 public:
@@ -59,6 +64,7 @@ private:
     ros::Publisher  _model_pub, _imu_pub;
 
     double _gravity;
+    std::queue<sensor_msgs::Imu> _imu_queue;
 
 };
 #endif // ROBOT_H

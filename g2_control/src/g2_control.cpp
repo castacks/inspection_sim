@@ -9,7 +9,6 @@ G2Control::G2Control(ros::NodeHandle &nh) {
 
     nh.param("/g2_control/spin_freq", _spin_freq, 1.0);
 
-//    _g2_pub    = nh.advertise<std_msgs::Float64>("/g2_command", 100);
     _g2_pub    = nh.advertise<gazebo_msgs::LinkState>("/gazebo/set_link_state", 100);
     _laser_pub = nh.advertise<sensor_msgs::PointCloud2>("/dji_sim/laser/pointcloud", 10);
 
@@ -46,16 +45,6 @@ void G2Control::publish_g2_angle(const ros::TimerEvent& event) {
     }
 
     _g2_angle = M_PI*_spin_freq*_time_delta;
-
-//    if(_g2_angle > 0x8ffffffffffffffe) {
-//        ROS_ERROR("g2 angle exceeds numeric limit, stopping now.");
-//        return;
-//    }
-
-//    ROS_INFO("angle: %0.4f; dt: %0.4f", _g2_angle, _time_delta);
-//    std_msgs::Float64 msg;
-//    msg.data = _g2_angle;
-//    _g2_pub.publish(msg);
 
     gazebo_msgs::LinkState msg;
     msg.link_name = "dji::hokuyo_link";

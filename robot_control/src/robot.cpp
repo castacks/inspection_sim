@@ -40,6 +40,8 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
 
     _model_pub = nh.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 10);
     _imu_pub   = nh.advertise<sensor_msgs::Imu>("/dji_sim/imu", 100);
+
+    _imu_queue.empty();
 }
 
 void RobotControl::target_callback(const geometry_msgs::Pose::Ptr msg)
@@ -71,6 +73,7 @@ void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
             update_state();
             publish_state();
             publish_imu();
+            return;
         }
     }
 
@@ -167,7 +170,7 @@ void RobotControl::publish_state()
 
 void RobotControl::publish_imu()
 {
-    tf::Vector3 gravity_vector(0.0, 0.0, -_gravity);
+    tf::Vector3 gravity_vector(0.0, 0.0, _gravity);
 
     tf::Matrix3x3 rot_gazebo_to_dji;
     tf::Matrix3x3 rot_dji_to_base;
