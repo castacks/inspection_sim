@@ -14,9 +14,8 @@
     <remap from="/joint_states" to="/g2/joint_states" />
   </node>
   
-  <node name="g2_control" pkg="g2_control" type="g2_control_node" >
-    <!--<remap from="/g2_command" to="/g2/g2_position_controller/command" /> -->
-    <param name="spin_freq" type="double" value="1"/>
+  <node name="g2_control" pkg="g2_control" type="g2_control_node" output="screen">
+    <param name="spin_freq" type="double" value="0.5"/>
   </node>
 
 </launch>

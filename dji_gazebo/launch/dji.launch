@@ -26,6 +26,9 @@
   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
 	args="-urdf -model dji -param robot_description"/>
 	
+  <!-- Load static tf publishers-->
+  <include file="$(find dji_gazebo)/launch/tf_pub.launch"/>
+	
   <node name="rviz_viz" pkg="rviz" type="rviz" args="-d $(find dji_gazebo)/rviz/dji_sim.rviz"/>
 	
 </launch>

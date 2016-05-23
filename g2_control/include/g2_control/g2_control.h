@@ -18,7 +18,6 @@ public:
     ~G2Control() {}
 
     void publish_point_cloud(const sensor_msgs::LaserScan &msg);
-    void publish_tf_body_to_laser(const sensor_msgs::JointState &msg);
     void publish_g2_angle(const ros::TimerEvent& event);
 private:
     ros::NodeHandlePtr _nh_ptr;
@@ -28,7 +27,7 @@ private:
     double _time_now, _time_old, _time_delta;
 
     ros::Publisher  _g2_pub, _laser_pub;
-    ros::Subscriber _g2_sub, _laser_sub;
+    ros::Subscriber _laser_sub;
 
     tf::TransformBroadcaster _br;
     laser_geometry::LaserProjection _projector;

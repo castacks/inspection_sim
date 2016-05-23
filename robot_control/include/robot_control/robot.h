@@ -4,6 +4,7 @@
 #include <queue>
 #include <ros/ros.h>
 #include <tf/tf.h>
+#include <tf/transform_broadcaster.h>
 #include <geometry_msgs/Pose.h>
 #include <sensor_msgs/Imu.h>
 #include <gazebo_msgs/ModelState.h>
@@ -25,6 +26,7 @@ public:
     void update_control();
     void update_state();
     void publish_state();
+    void publish_tf();
     void publish_imu();
     bool check_reach();
     void generate_noise();
@@ -73,6 +75,8 @@ private:
     tf::Vector3 _gyr_bias, _gyr_bias_noise, _gyr_bias_sgm;
 
     boost::mt19937 _rng;
+
+    tf::TransformBroadcaster _tf_br;
 
 };
 #endif // ROBOT_H

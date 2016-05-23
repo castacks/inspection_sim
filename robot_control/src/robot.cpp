@@ -61,10 +61,10 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
     _pos_err_i.setZero();
     _ori_err_i.setZero();
 
-    _pose_sub = nh.subscribe("/gazebo/model_states", 10, &RobotControl::pose_callback, this);
+    _pose_sub = nh.subscribe("/gazebo/model_states", 100, &RobotControl::pose_callback, this);
     _target_sub = nh.subscribe("/dji_sim/target_pose", 100, &RobotControl::target_callback, this);
 
-    _model_pub = nh.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 10);
+    _model_pub = nh.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 100);
     _imu_pub   = nh.advertise<sensor_msgs::Imu>("/dji_sim/imu", 100);
 
     _imu_queue.empty();
@@ -104,8 +104,9 @@ void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
             update_control();
             update_state();
             publish_state();
-            generate_noise();
-            publish_imu();
+            publish_tf();
+//            generate_noise();
+//            publish_imu();
             return;
         }
     }
@@ -199,6 +200,16 @@ void RobotControl::publish_state()
     msg.pose.orientation.z = _quaternion.z();
 
     _model_pub.publish(msg);
+}
+
+void RobotControl::publish_tf()
+{
+    ROS_INFO_ONCE("publishing tf.");
+    // publish tf
+    tf::Transform transform;
+    transform.setOrigin(_position);
+    transform.setRotation(_quaternion);
+    _tf_br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "gazebo_world", "dji_link"));
 }
 
 void RobotControl::publish_imu()

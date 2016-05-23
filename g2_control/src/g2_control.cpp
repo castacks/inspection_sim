@@ -10,23 +10,13 @@ G2Control::G2Control(ros::NodeHandle &nh) {
     nh.param("/g2_control/spin_freq", _spin_freq, 1.0);
 
     _g2_pub    = nh.advertise<gazebo_msgs::LinkState>("/gazebo/set_link_state", 100);
-    _laser_pub = nh.advertise<sensor_msgs::PointCloud2>("/dji_sim/laser/pointcloud", 10);
+    _laser_pub = nh.advertise<sensor_msgs::PointCloud2>("/dji_sim/laser/pointcloud", 100);
 
-    _g2_sub    = nh.subscribe("/g2/joint_states", 10, &G2Control::publish_tf_body_to_laser, this);
-    _laser_sub = nh.subscribe("/dji_sim/laser/laserscan", 10, &G2Control::publish_point_cloud, this);
+    _laser_sub = nh.subscribe("/dji_sim/laser/laserscan", 100, &G2Control::publish_point_cloud, this);
 
     _init = true;
     _tf_publishing = false;
     _g2_angle = 0.0;
-}
-
-void G2Control::publish_tf_body_to_laser(const sensor_msgs::JointState &msg){
-  tf::Transform transform;
-  transform.setOrigin( tf::Vector3(0.15, 0.0, -0.1) );
-  tf::Quaternion q;
-  q.setRPY(msg.position[0] + M_PI, 0.0, 0.0);
-  transform.setRotation(q);
-  _br.sendTransform(tf::StampedTransform(transform, msg.header.stamp, "base_link", "hokuyo_link"));
 }
 
 void G2Control::publish_g2_angle(const ros::TimerEvent& event) {
@@ -39,8 +29,8 @@ void G2Control::publish_g2_angle(const ros::TimerEvent& event) {
     _time_old = _time_now;
     _init = false;
 
-    if(fabs(_time_delta - 0.01) > 0.015 || fabs(_time_delta - 0.01) < 0.005 ) {
-        ROS_INFO("delta_t not valid");
+    if(fabs(_time_delta) > 0.02 || fabs(_time_delta) < 0.005 ) {
+        ROS_WARN("g2_control: delta_t = %0.4f", _time_delta);
         _time_delta = 0.01;
     }
 
@@ -67,8 +57,8 @@ void G2Control::publish_point_cloud(const sensor_msgs::LaserScan &msg) {
         msg.header.frame_id,
         "/base_link",
         msg.header.stamp + ros::Duration().fromSec(msg.ranges.size()*msg.time_increment),
-        ros::Duration(0.001))){
-        ROS_WARN("transform");
+        ros::Duration(0.02))){
+        ROS_WARN("g2_control: lose transform from %s to base_link", msg.header.frame_id.c_str());
         return;
     }
 
@@ -83,22 +73,27 @@ void G2Control::publish_point_cloud(const sensor_msgs::LaserScan &msg) {
     pcl::fromROSMsg(pc2_msg,pcl_cloud);
     pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud_ptr;
     pcl_cloud_ptr = pcl_cloud.makeShared();
+    pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud_crop_x_ptr (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud_crop_xy_ptr (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud_crop_xyz_ptr (new pcl::PointCloud<pcl::PointXYZ>);
 
     // truncating in a range
-    double rangeLim = 25.0;
+    double rangeLim = 15.0;
     pcl::PassThrough<pcl::PointXYZ> pass;
     pass.setInputCloud(pcl_cloud_ptr);
     pass.setFilterFieldName("x");
-    pass.setFilterLimits (rangeLim, rangeLim);
-    pass.filter(pcl_cloud);
+    pass.setFilterLimits (-rangeLim, rangeLim);
+    pass.filter(*pcl_cloud_crop_x_ptr);
 
+    pass.setInputCloud(pcl_cloud_crop_x_ptr);
     pass.setFilterFieldName("y");
     pass.setFilterLimits (-rangeLim, rangeLim);
-    pass.filter(pcl_cloud);
+    pass.filter(*pcl_cloud_crop_xy_ptr);
 
+    pass.setInputCloud(pcl_cloud_crop_xy_ptr);
     pass.setFilterFieldName("z");
     pass.setFilterLimits (-rangeLim, rangeLim);
-    pass.filter(pcl_cloud);
+    pass.filter(*pcl_cloud_crop_xyz_ptr);
 
     // truncate in a bounding range
     pcl::ConditionOr<pcl::PointXYZ>::Ptr rangeCond (new pcl::ConditionOr<pcl::PointXYZ> ());
@@ -117,7 +112,7 @@ void G2Control::publish_point_cloud(const sensor_msgs::LaserScan &msg) {
 
     pcl::ConditionalRemoval<pcl::PointXYZ> condRem;
     condRem.setCondition((rangeCond));
-    condRem.setInputCloud(pcl_cloud_ptr);
+    condRem.setInputCloud(pcl_cloud_crop_xyz_ptr);
     condRem.setKeepOrganized(true);
     condRem.filter(pcl_cloud);
 

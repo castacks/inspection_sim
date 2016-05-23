@@ -7,6 +7,7 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
 
     RobotControl robot(n);
+//    ros::Timer timer = n.createTimer(ros::Duration(0.05), &RobotControl::publish_tf, &robot);
     ros::spin();
 
     return 0;
