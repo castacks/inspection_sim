@@ -27,6 +27,7 @@ public:
     void publish_state();
     void publish_imu();
     bool check_reach();
+    void generate_noise();
 private:
 
     double _time, _time_old, _dt;
@@ -65,6 +66,13 @@ private:
 
     double _gravity;
     std::queue<sensor_msgs::Imu> _imu_queue;
+    tf::Vector3 _acc_noise, _acc_sgm;
+    tf::Vector3 _gyr_noise, _gyr_sgm;
+
+    tf::Vector3 _acc_bias, _acc_bias_noise, _acc_bias_sgm;
+    tf::Vector3 _gyr_bias, _gyr_bias_noise, _gyr_bias_sgm;
+
+    boost::mt19937 _rng;
 
 };
 #endif // ROBOT_H

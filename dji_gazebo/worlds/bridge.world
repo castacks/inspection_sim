@@ -39,13 +39,13 @@
       <link name="body">
         <visual name="visual">
           <geometry>
-            <mesh><uri>file:///home/weikunz/catkin/djisim_ws/src/inspection_sim/dji_gazebo/models/bridge_model.dae</uri></mesh>
+            <mesh><uri>file:///home/aeroscout/catkin/djisim_ws/src/inspection_sim/dji_gazebo/models/bridge_model.dae</uri></mesh>
           </geometry>
         </visual>
         
         <collision name="collision">
           <geometry>
-	        <mesh><uri>file:///home/weikunz/catkin/djisim_ws/src/inspection_sim/dji_gazebo/models/bridge_model.dae</uri></mesh>
+	        <mesh><uri>file:///home/aeroscout/catkin/djisim_ws/src/inspection_sim/dji_gazebo/models/bridge_model.dae</uri></mesh>
           </geometry>
         </collision>
       </link>

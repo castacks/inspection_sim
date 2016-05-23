@@ -26,4 +26,6 @@
   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
 	args="-urdf -model dji -param robot_description"/>
 	
+  <node name="rviz_viz" pkg="rviz" type="rviz" args="-d $(find dji_gazebo)/rviz/dji_sim.rviz"/>
+	
 </launch>

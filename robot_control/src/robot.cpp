@@ -19,6 +19,32 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
     nh.param("ori_d",       _ori_d,         1.0);
     nh.param("gravity",     _gravity,       9.8);
 
+    double acc_sgm_x, acc_sgm_y, acc_sgm_z;
+    double gyr_sgm_x, gyr_sgm_y, gyr_sgm_z;
+    nh.param("acc_sigma_x", acc_sgm_x,      0.1);
+    nh.param("acc_sigma_y", acc_sgm_y,      0.1);
+    nh.param("acc_sigma_z", acc_sgm_z,      0.1);
+    nh.param("gyr_sigma_x", gyr_sgm_x,      0.1);
+    nh.param("gyr_sigma_y", gyr_sgm_y,      0.1);
+    nh.param("gyr_sigma_z", gyr_sgm_z,      0.1);
+
+    double acc_bias_sgm_x, acc_bias_sgm_y, acc_bias_sgm_z;
+    double gyr_bias_sgm_x, gyr_bias_sgm_y, gyr_bias_sgm_z;
+    nh.param("acc_bias_sigma_x", acc_bias_sgm_x,      0.0001);
+    nh.param("acc_bias_sigma_y", acc_bias_sgm_y,      0.0001);
+    nh.param("acc_bias_sigma_z", acc_bias_sgm_z,      0.0001);
+    nh.param("gyr_bias_sigma_x", gyr_bias_sgm_x,      0.0001);
+    nh.param("gyr_bias_sigma_y", gyr_bias_sgm_y,      0.0001);
+    nh.param("gyr_bias_sigma_z", gyr_bias_sgm_z,      0.0001);
+
+    _acc_sgm.setValue(acc_sgm_x, acc_sgm_y, acc_sgm_z);
+    _gyr_sgm.setValue(gyr_sgm_x, gyr_sgm_y, gyr_sgm_z);
+
+    _acc_bias_sgm.setValue(acc_bias_sgm_x, acc_bias_sgm_y, acc_bias_sgm_z);
+    _gyr_bias_sgm.setValue(gyr_bias_sgm_x, gyr_bias_sgm_y, gyr_bias_sgm_z);
+
+    _acc_bias.setZero();
+    _gyr_bias.setZero();
 
     _init_time = true;
     _init_ctrl = true;
@@ -42,6 +68,12 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
     _imu_pub   = nh.advertise<sensor_msgs::Imu>("/dji_sim/imu", 100);
 
     _imu_queue.empty();
+
+    _acc_noise.setZero();
+    _gyr_noise.setZero();
+    _acc_bias_noise.setZero();
+    _gyr_bias_noise.setZero();
+
 }
 
 void RobotControl::target_callback(const geometry_msgs::Pose::Ptr msg)
@@ -72,6 +104,7 @@ void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
             update_control();
             update_state();
             publish_state();
+            generate_noise();
             publish_imu();
             return;
         }
@@ -192,13 +225,13 @@ void RobotControl::publish_imu()
     msg.header.frame_id = "base_link";
     msg.header.stamp = ros::Time::now();
 
-    msg.angular_velocity.x = imu_gyroscope.x();
-    msg.angular_velocity.y = imu_gyroscope.y();
-    msg.angular_velocity.z = imu_gyroscope.z();
+    msg.angular_velocity.x = imu_gyroscope.x() + _gyr_noise.x();
+    msg.angular_velocity.y = imu_gyroscope.y() + _gyr_noise.y();
+    msg.angular_velocity.z = imu_gyroscope.z() + _gyr_noise.z();
 
-    msg.linear_acceleration.x = imu_accelerometer.x();
-    msg.linear_acceleration.y = imu_accelerometer.y();
-    msg.linear_acceleration.z = imu_accelerometer.z();
+    msg.linear_acceleration.x = imu_accelerometer.x() + _acc_noise.x();
+    msg.linear_acceleration.y = imu_accelerometer.y() + _acc_noise.y();
+    msg.linear_acceleration.z = imu_accelerometer.z() + _acc_noise.z();
 
     msg.orientation.w = imu_quaternion.w();
     msg.orientation.x = imu_quaternion.x();
@@ -207,4 +240,28 @@ void RobotControl::publish_imu()
 
     _imu_pub.publish(msg);
 
+}
+
+void RobotControl::generate_noise()
+{
+    for(int i=0; i<3; i++) {
+        boost::normal_distribution<> acc_bias_nd(0.0, _acc_bias_sgm[i]);
+        ND_GEN var(_rng, acc_bias_nd);
+        _acc_bias[i] += var() * _dt;
+    }
+    for(int i=0; i<3; i++) {
+        boost::normal_distribution<> gyr_bias_nd(0.0, _gyr_bias_sgm[i]);
+        ND_GEN var(_rng, gyr_bias_nd);
+        _gyr_bias[i] += var() * _dt;
+    }
+    for(int i=0; i<3; i++) {
+        boost::normal_distribution<> acc_nd(0.0, _acc_sgm[i]);
+        ND_GEN var(_rng, acc_nd);
+        _acc_noise[i] = (var() + _acc_bias[i]);
+    }
+    for(int i=0; i<3; i++) {
+        boost::normal_distribution<> gyr_nd(0.0, _gyr_sgm[i]);
+        ND_GEN var(_rng, gyr_nd);
+        _gyr_noise[i] = (var() + _gyr_bias[i]);
+    }
 }
