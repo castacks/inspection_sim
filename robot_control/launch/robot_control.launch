@@ -15,4 +15,5 @@
     <param name="ori_d"         type="double"           value="1.0"/>
   </node>
 
+  <include file="$(find robot_control)/launch/js_control.launch"/>
 </launch>

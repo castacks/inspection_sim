@@ -10,13 +10,14 @@ public:
 
     void js_callback(const sensor_msgs::Joy &msg);
     void target_callback(const geometry_msgs::Pose &msg);
-    void publish_target();
+    void publish_target(const ros::TimerEvent& event);
     void update_time();
 
 private:
     tf::Vector3 _target_position;
     tf::Vector3 _target_orientation;
     tf::Quaternion _target_quaternion;
+    tf::Matrix3x3 _target_rotation;
 
     double _x_rate, _y_rate, _z_rate, _yaw_rate;
     double _MAX_X_RATE, _MAX_Y_RATE, _MAX_Z_RATE, _MAX_YAW_RATE;
@@ -38,6 +39,7 @@ JSControl::JSControl(ros::NodeHandle &nh)
 
     _target_position.setZero();
     _target_orientation.setZero();
+    _target_rotation.setIdentity();
 
     _x_rate = 0.0;
     _y_rate = 0.0;
@@ -46,7 +48,7 @@ JSControl::JSControl(ros::NodeHandle &nh)
 
     _target_pub = nh.advertise<geometry_msgs::Pose>("/dji_sim/target_pose", 10);
 
-    _target_sub = nh.subscribe("/di_sim/target_pose", 10, &JSControl::target_callback, this);
+    _target_sub = nh.subscribe("/dji_sim/target_pose", 10, &JSControl::target_callback, this);
     _js_sub = nh.subscribe("/dji_sim/joy", 10, &JSControl::js_callback, this);
 
     _init_time = true;
@@ -55,20 +57,23 @@ JSControl::JSControl(ros::NodeHandle &nh)
 
 void JSControl::js_callback(const sensor_msgs::Joy &msg)
 {
-    _x_rate   =  _MAX_X_RATE * msg.axes[3];
-    _y_rate   = -_MAX_Y_RATE * msg.axes[2];
-    _z_rate   =  _MAX_Z_RATE * msg.axes[1];
-    _yaw_rate =  _MAX_YAW_RATE * msg.axes[0];
-
-    update_time();
-    publish_target();
+    _x_rate   = _MAX_X_RATE * msg.axes[3];
+    _y_rate   = _MAX_Y_RATE * msg.axes[2];
+    _z_rate   = _MAX_Z_RATE * msg.axes[1];
+    _yaw_rate = _MAX_YAW_RATE * msg.axes[0];
 }
 
-void JSControl::publish_target()
+void JSControl::publish_target(const ros::TimerEvent& event)
 {
-    _target_position[0] += _x_rate * _dt;
-    _target_position[1] += _y_rate * _dt;
-    _target_position[2] += _z_rate * _dt;
+    update_time();
+
+    tf::Vector3 delta_position_global, delta_position_local;
+    delta_position_local.setValue(_x_rate * _dt, _y_rate * _dt, _z_rate * _dt);
+    delta_position_global = _target_rotation * delta_position_local;
+
+    _target_position[0] += delta_position_global[0];
+    _target_position[1] += delta_position_global[1];
+    _target_position[2] += delta_position_global[2];
 
     _target_orientation[2] += _yaw_rate * _dt;
 
@@ -86,6 +91,8 @@ void JSControl::publish_target()
     msg.position.z = _target_position.z();
 
     _target_pub.publish(msg);
+
+    ROS_INFO_ONCE("Publish target");
 }
 
 
@@ -113,15 +120,18 @@ void JSControl::target_callback(const geometry_msgs::Pose &msg)
     _target_position[2] = msg.position.z;
 
     tf::quaternionMsgToTF(msg.orientation, _target_quaternion);
-    tf::Matrix3x3(_target_quaternion).getRPY(_target_orientation[0],_target_orientation[1],_target_orientation[2]);
+
+    _target_rotation.setRotation(_target_quaternion);
+    _target_rotation.getRPY(_target_orientation[0],_target_orientation[1],_target_orientation[2]);
 }
 
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "js_control_node");
-    ros::NodeHandle n;
+    ros::NodeHandle n("~");
 
     JSControl joy(n);
+    ros::Timer timer = n.createTimer(ros::Duration(0.01), &JSControl::publish_target, &joy);
     ros::spin();
 
     return 0;
