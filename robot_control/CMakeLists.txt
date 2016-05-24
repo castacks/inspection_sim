@@ -132,7 +132,6 @@ add_library(robot src/robot.cpp)
 
 ## Declare a C++ executable
 add_executable(robot_control_node src/robot_control_node.cpp)
-
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(trajectory_control_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -140,3 +139,5 @@ add_executable(robot_control_node src/robot_control_node.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(robot_control_node robot ${catkin_LIBRARIES})
 
+add_executable(js_control_node src/js_control_node.cpp)
+target_link_libraries(js_control_node ${catkin_LIBRARIES})

@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<launch>
+
+  <node name="js_control" pkg="robot_control" type="js_control_node" output="screen">
+    <param name="max_x_rate"          type="double"           value="0.5"/>
+    <param name="max_y_rate"          type="double"           value="0.5"/>
+    <param name="max_z_rate"          type="double"           value="0.5"/>
+    <param name="max_yaw_rate"        type="double"           value="0.1"/>
+  </node>
+
+
+  <node name="joy_node" pkg="joy" type="joy_node">
+    <param name="dev"       value="/dev/input/js0"/>
+  </node>
+</launch>
