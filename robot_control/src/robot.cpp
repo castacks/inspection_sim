@@ -19,6 +19,9 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
     nh.param("ori_d",       _ori_d,         1.0);
     nh.param("gravity",     _gravity,       9.8);
 
+    nh.param("max_linear_vel",  _MAX_LINEAR_VEL,  0.5);
+    nh.param("max_angular_vel", _MAX_ANGULAR_VEL, 0.3);
+
     double acc_sgm_x, acc_sgm_y, acc_sgm_z;
     double gyr_sgm_x, gyr_sgm_y, gyr_sgm_z;
     nh.param("acc_sigma_x", acc_sgm_x,      0.1);
@@ -105,8 +108,8 @@ void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
             update_state();
             publish_state();
             publish_tf();
-//            generate_noise();
-//            publish_imu();
+            generate_noise();
+            publish_imu();
             return;
         }
     }
@@ -178,6 +181,14 @@ void RobotControl::update_state()
 
     _linear_velocity  = _linear_velocity  + _linear_acceleration  * _dt;
     _angular_velocity = _angular_velocity + _angular_acceleration * _dt;
+
+    if(fabs(_linear_velocity[0]) > _MAX_LINEAR_VEL) _linear_velocity[0] = sgn(_linear_velocity[0]) * _MAX_LINEAR_VEL;
+    if(fabs(_linear_velocity[1]) > _MAX_LINEAR_VEL) _linear_velocity[1] = sgn(_linear_velocity[1]) * _MAX_LINEAR_VEL;
+    if(fabs(_linear_velocity[2]) > _MAX_LINEAR_VEL) _linear_velocity[2] = sgn(_linear_velocity[2]) * _MAX_LINEAR_VEL;
+
+    if(fabs(_angular_velocity[0]) > _MAX_ANGULAR_VEL) _angular_velocity[0] = sgn(_angular_velocity[0]) * _MAX_ANGULAR_VEL;
+    if(fabs(_angular_velocity[1]) > _MAX_ANGULAR_VEL) _angular_velocity[1] = sgn(_angular_velocity[1]) * _MAX_ANGULAR_VEL;
+    if(fabs(_angular_velocity[2]) > _MAX_ANGULAR_VEL) _angular_velocity[2] = sgn(_angular_velocity[2]) * _MAX_ANGULAR_VEL;
 
     _position    = _position    + _linear_velocity  * _dt;
     _orientation = _orientation + _angular_velocity * _dt;

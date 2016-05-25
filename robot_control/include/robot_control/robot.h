@@ -62,6 +62,7 @@ private:
     tf::Vector3 _pos_err_prev, _ori_err_prev;
 
     double _MAX_FORCE, _MAX_TORQUE;
+    double _MAX_LINEAR_VEL, _MAX_ANGULAR_VEL;
 
     ros::Subscriber _pose_sub, _target_sub;
     ros::Publisher  _model_pub, _imu_pub;
