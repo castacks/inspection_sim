@@ -26,6 +26,9 @@ Now if you have a play station, you can drive the robot now. Make sure to adjust
 roslaunch lidar_ekf dji_gazebo.launch 
 ```
 
+Now you should see the simulation like following figure.
+![dji_sim.png](https://bitbucket.org/repo/gBoX7x/images/985936132-dji_sim.png)
+
 ### Who do I talk to? ###
 
 * Weikun Zhen (zhenwk@gmail.com)
