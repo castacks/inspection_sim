@@ -19,8 +19,12 @@ roslaunch g2_control g2_control.launch
 ```
 roslaunch robot_control robot_control.launch
 ```
-* Also if you have a play station, you can drive the robot now.
+Now if you have a play station, you can drive the robot now. Make sure to adjust the device name in ```robot_control/launch/js_control.launch```.
 
+* Open the fourth terminal to start localization. 
+```
+roslaunch lidar_ekf dji_gazebo.launch 
+```
 
 ### Who do I talk to? ###
 
