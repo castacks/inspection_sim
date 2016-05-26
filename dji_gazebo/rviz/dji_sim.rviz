@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /laser_scan1
         - /TF1/Frames1
       Splitter Ratio: 0.492574
     Tree Height: 772
@@ -27,7 +28,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: laser_scan
+    SyncSource: sync_cloud
 Visualization Manager:
   Class: ""
   Displays:
@@ -73,7 +74,7 @@ Visualization Manager:
       Color: 0; 0; 255
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4.2039e-44
@@ -90,21 +91,51 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
     - Class: rviz/TF
-      Enabled: false
+      Enabled: true
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        base_link:
+          Value: true
+        body:
+          Value: false
+        camera:
+          Value: false
+        camera_link:
+          Value: false
+        dji_link:
+          Value: false
+        gazebo_world:
+          Value: false
+        hokuyo_link:
+          Value: false
+        imu:
+          Value: false
+        world:
+          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        {}
+        world:
+          gazebo_world:
+            dji_link:
+              base_link:
+                {}
+              camera_link:
+                camera:
+                  {}
+              hokuyo_link:
+                {}
+          imu:
+            body:
+              {}
       Update Interval: 0
-      Value: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -146,34 +177,34 @@ Visualization Manager:
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
-      Enabled: true
+      Enabled: false
       Links:
         All Links Enabled: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        camera_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        dji_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        hokuyo_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
       Name: dji
       Robot Description: robot_description
       TF Prefix: ""
       Update Interval: 0
-      Value: true
+      Value: false
       Visual Enabled: true
+    - Alpha: 1
+      Axes Length: 0.5
+      Axes Radius: 0.05
+      Class: rviz/Pose
+      Color: 255; 25; 0
+      Enabled: true
+      Head Length: 0.3
+      Head Radius: 0.1
+      Name: ekf_pose
+      Shaft Length: 1
+      Shaft Radius: 0.05
+      Shape: Axes
+      Topic: /lidar_ekf/ekf_pose
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 255; 255; 255
@@ -198,7 +229,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/ThirdPersonFollower
-      Distance: 24.62
+      Distance: 13.8856
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
@@ -210,10 +241,10 @@ Visualization Manager:
         Z: -6
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.345398
+      Pitch: 0.350398
       Target Frame: dji_link
       Value: ThirdPersonFollower (rviz)
-      Yaw: 3.25909
+      Yaw: 3.02409
     Saved:
       - Class: rviz/XYOrbit
         Distance: 22.1068
@@ -248,7 +279,7 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1280
-  X: 198
-  Y: 30
+  X: 1910
+  Y: 14
   camera:
     collapsed: false
