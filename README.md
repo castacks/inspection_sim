@@ -22,7 +22,11 @@ roslaunch g2_control g2_control.launch
 ```
 roslaunch robot_control robot_control.launch
 ```
-Now if you have a play station, you can drive the robot now. Make sure to adjust the device name in ```robot_control/launch/js_control.launch```.
+Now if you have a joystick, you can drive the robot now. Make sure to adjust the device name in ```robot_control/launch/js_control.launch```. Alternatively you can publish your topic using 
+
+```
+rostopic pub -r 10 /dji_sim/target_pose geometry_msgs/Pose "{position: {z: 1.0}, orientation: {w: 1.0}}"
+```
 
 5 Open the fourth terminal to start localization. 
 ```
