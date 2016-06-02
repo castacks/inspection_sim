@@ -35,7 +35,7 @@ private:
 
     double _time, _time_old, _dt;
     double _freq;
-    bool   _init_time, _init_ctrl;
+    bool   _init_time, _init_ctrl, _init_target, _init_pose;
 
     double _mass;
     tf::Vector3 _force;
@@ -44,14 +44,17 @@ private:
     tf::Vector3 _position;
 
     double _inertia;
+    double _target_round, _pose_round;
     tf::Vector3 _torque;
     tf::Vector3 _angular_acceleration;
     tf::Vector3 _angular_velocity;
     tf::Vector3 _orientation;
+    tf::Vector3 _orientation_prev;
     tf::Quaternion _quaternion;
 
     tf::Vector3 _target_position;
     tf::Vector3 _target_orientation;
+    tf::Vector3 _target_orientation_prev;
 
 
     double _pos_p, _pos_i, _pos_d;

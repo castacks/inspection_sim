@@ -51,9 +51,15 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
 
     _init_time = true;
     _init_ctrl = true;
+    _init_target = true;
+    _init_pose = true;
 
     _target_position.setZero();
     _target_orientation.setZero();
+    _target_orientation_prev.setZero();
+
+    _target_round = 0.0;
+    _pose_round = 0.0;
 
     _linear_acceleration.setZero();
     _angular_acceleration.setZero();
@@ -96,6 +102,25 @@ void RobotControl::target_callback(const geometry_msgs::Pose::Ptr msg)
     tf::quaternionMsgToTF(msg->orientation,q);
     tf::Matrix3x3(q).getRPY(_target_orientation[0],_target_orientation[1],_target_orientation[2]);
 
+    if(_init_target) {
+        _target_orientation_prev = _target_orientation;
+        _init_target = false;
+    }
+
+    // Count how many round the target yaw has been
+    if(_target_orientation[2] - _target_orientation_prev[2] > 0.5) {
+        _target_round--;
+    }
+    if(_target_orientation[2] - _target_orientation_prev[2] < -0.5) {
+        _target_round++;
+    }
+
+    _target_orientation_prev = _target_orientation;
+    _target_orientation[2] += 2.0*M_PI*_target_round;
+
+//    ROS_INFO("robot_control: target yaw = %0.4f", _target_orientation[2]);
+//    ROS_INFO("robot_control: target round = %0.1f", _target_round);
+
 }
 
 void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
@@ -110,6 +135,21 @@ void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
             tf::quaternionMsgToTF(msg->pose[i].orientation, q);
             tf::Matrix3x3(q).getRPY(_orientation[0],_orientation[1],_orientation[2]);
 
+            if(_init_pose) {
+                _orientation_prev = _orientation;
+                _init_pose = false;
+            }
+
+            if(_orientation[2] - _orientation_prev[2] > 0.5) {
+                _pose_round--;
+            }
+            if(_orientation[2] - _orientation_prev[2] < -0.5) {
+                _pose_round++;
+            }
+
+            _orientation_prev = _orientation;
+            _orientation[2] += 2.0*M_PI*_pose_round;
+//            ROS_INFO("robot_control: pose round = %0.1f", _pose_round);
             update_time();
             update_control();
             update_state();
