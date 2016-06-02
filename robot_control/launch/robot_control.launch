@@ -5,16 +5,16 @@
     <param name="mass"              type="double"           value="1.0"/>
     <param name="inertia"           type="double"           value="0.2"/>
     <param name="freq"              type="double"           value="100.0"/>
-    <param name="max_force"         type="double"           value="2.0"/>
-    <param name="max_torque"        type="double"           value="2.0"/>
+    <param name="max_force"         type="double"           value="5.0"/>
+    <param name="max_torque"        type="double"           value="5.0"/>
     <param name="pos_p"             type="double"           value="5.0"/>
     <param name="pos_i"             type="double"           value="0.0"/>
-    <param name="pos_d"             type="double"           value="1.0"/>
+    <param name="pos_d"             type="double"           value="5.0"/>
     <param name="ori_p"             type="double"           value="2.0"/>
     <param name="ori_i"             type="double"           value="0.0"/>
-    <param name="ori_d"             type="double"           value="2.0"/>
-    <param name="max_linear_vel"    type="double"           value="1.0"/>
-    <param name="max_angular_vel"   type="double"           value="1.0"/>
+    <param name="ori_d"             type="double"           value="3.0"/>
+    <param name="max_linear_vel"    type="double"           value="2.0"/>
+    <param name="max_angular_vel"   type="double"           value="2.0"/>
   </node>
 
   <include file="$(find robot_control)/launch/js_control.launch"/>

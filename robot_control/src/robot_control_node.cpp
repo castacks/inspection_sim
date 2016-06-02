@@ -4,7 +4,7 @@
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "robot_control_node");
-    ros::NodeHandle n;
+    ros::NodeHandle n("~");
 
     RobotControl robot(n);
     ros::spin();
