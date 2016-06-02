@@ -64,18 +64,25 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
     _pos_err_i.setZero();
     _ori_err_i.setZero();
 
-    _pose_sub = nh.subscribe("/gazebo/model_states", 100, &RobotControl::pose_callback, this);
+    _model_sub = nh.subscribe("/gazebo/model_states", 100, &RobotControl::pose_callback, this);
     _target_sub = nh.subscribe("/dji_sim/target_pose", 100, &RobotControl::target_callback, this);
 
     _model_pub = nh.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 100);
     _imu_pub   = nh.advertise<sensor_msgs::Imu>("/dji_sim/imu", 100);
-
+    _pose_pub  = nh.advertise<geometry_msgs::PoseStamped>("/dji_sim/pose", 100);
     _imu_queue.empty();
 
     _acc_noise.setZero();
     _gyr_noise.setZero();
     _acc_bias_noise.setZero();
     _gyr_bias_noise.setZero();
+
+    _rot_gazebo_to_dji.setIdentity();
+    _rot_dji_to_base.setRPY(M_PI, 0.0, 0.0);
+    _rot_world_to_base.setIdentity();
+    _rot_gazebo_to_base.setIdentity();
+    _rot_world_to_gazebo.setRPY(M_PI, 0.0, 0.0);
+
 
 }
 
@@ -110,6 +117,7 @@ void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
             publish_tf();
             generate_noise();
             publish_imu();
+            publish_pose();
             return;
         }
     }
@@ -227,21 +235,17 @@ void RobotControl::publish_imu()
 {
     tf::Vector3 gravity_vector(0.0, 0.0, _gravity);
 
-    tf::Matrix3x3 rot_gazebo_to_dji;
-    tf::Matrix3x3 rot_dji_to_base;
-    tf::Matrix3x3 rot_gazebo_to_base;
-
-    rot_gazebo_to_dji.setRotation(_quaternion);
-    rot_dji_to_base.setRPY(M_PI, 0.0, 0.0);
-    rot_gazebo_to_base = rot_gazebo_to_dji * rot_dji_to_base;
+    _rot_gazebo_to_dji.setRotation(_quaternion);
+    _rot_gazebo_to_base = _rot_gazebo_to_dji * _rot_dji_to_base;
+    _rot_world_to_base = _rot_world_to_gazebo * _rot_gazebo_to_base;
 
     tf::Vector3 imu_accelerometer(0.0, 0.0, 0.0);
     tf::Vector3 imu_gyroscope(0.0, 0.0, 0.0);
     tf::Quaternion imu_quaternion;
 
-    imu_accelerometer = rot_gazebo_to_base.transpose() * (_linear_acceleration + gravity_vector);
-    imu_gyroscope     = rot_gazebo_to_base.transpose() * _angular_velocity;
-    rot_gazebo_to_base.getRotation(imu_quaternion);
+    imu_accelerometer =_rot_gazebo_to_base.transpose() * (_linear_acceleration + gravity_vector);
+    imu_gyroscope     = _rot_gazebo_to_base.transpose() * _angular_velocity;
+    _rot_world_to_base.getRotation(imu_quaternion);
     sensor_msgs::Imu msg;
 
     msg.header.frame_id = "base_link";
@@ -286,4 +290,22 @@ void RobotControl::generate_noise()
         ND_GEN var(_rng, gyr_nd);
         _gyr_noise[i] = (var() + _gyr_bias[i]);
     }
+}
+
+void RobotControl::publish_pose()
+{
+    geometry_msgs::PoseStamped msg;
+    msg.header.frame_id = "world";
+    msg.header.stamp = ros::Time::now();
+
+    msg.pose.position.x = _position.x();
+    msg.pose.position.y = _position.y();
+    msg.pose.position.z = _position.z();
+
+    msg.pose.orientation.w = _quaternion.w();
+    msg.pose.orientation.x = _quaternion.x();
+    msg.pose.orientation.y = _quaternion.y();
+    msg.pose.orientation.z = _quaternion.z();
+
+    _pose_pub.publish(msg);
 }

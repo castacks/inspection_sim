@@ -28,6 +28,7 @@ public:
     void publish_state();
     void publish_tf();
     void publish_imu();
+    void publish_pose();
     bool check_reach();
     void generate_noise();
 private:
@@ -64,8 +65,8 @@ private:
     double _MAX_FORCE, _MAX_TORQUE;
     double _MAX_LINEAR_VEL, _MAX_ANGULAR_VEL;
 
-    ros::Subscriber _pose_sub, _target_sub;
-    ros::Publisher  _model_pub, _imu_pub;
+    ros::Subscriber _model_sub, _target_sub;
+    ros::Publisher  _model_pub, _pose_pub, _imu_pub;
 
     double _gravity;
     std::queue<sensor_msgs::Imu> _imu_queue;
@@ -78,6 +79,12 @@ private:
     boost::mt19937 _rng;
 
     tf::TransformBroadcaster _tf_br;
+
+    tf::Matrix3x3 _rot_gazebo_to_dji;
+    tf::Matrix3x3 _rot_dji_to_base;
+    tf::Matrix3x3 _rot_gazebo_to_base;
+    tf::Matrix3x3 _rot_world_to_gazebo;
+    tf::Matrix3x3 _rot_world_to_base;
 
 };
 #endif // ROBOT_H
