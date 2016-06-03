@@ -29,6 +29,7 @@ public:
     void publish_tf();
     void publish_imu();
     void publish_pose();
+    void publish_control();
     bool check_reach();
     void generate_noise();
 private:
@@ -69,7 +70,7 @@ private:
     double _MAX_LINEAR_VEL, _MAX_ANGULAR_VEL;
 
     ros::Subscriber _model_sub, _target_sub;
-    ros::Publisher  _model_pub, _pose_pub, _imu_pub;
+    ros::Publisher  _model_pub, _pose_pub, _imu_pub, _force_pub, _torque_pub;
 
     double _gravity;
     std::queue<sensor_msgs::Imu> _imu_queue;

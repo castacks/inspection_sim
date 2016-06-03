@@ -24,21 +24,21 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
 
     double acc_sgm_x, acc_sgm_y, acc_sgm_z;
     double gyr_sgm_x, gyr_sgm_y, gyr_sgm_z;
-    nh.param("acc_sigma_x", acc_sgm_x,      0.1);
-    nh.param("acc_sigma_y", acc_sgm_y,      0.1);
-    nh.param("acc_sigma_z", acc_sgm_z,      0.1);
-    nh.param("gyr_sigma_x", gyr_sgm_x,      0.1);
-    nh.param("gyr_sigma_y", gyr_sgm_y,      0.1);
-    nh.param("gyr_sigma_z", gyr_sgm_z,      0.1);
+    nh.param("acc_sigma_x", acc_sgm_x,      0.01);
+    nh.param("acc_sigma_y", acc_sgm_y,      0.01);
+    nh.param("acc_sigma_z", acc_sgm_z,      0.01);
+    nh.param("gyr_sigma_x", gyr_sgm_x,      0.001);
+    nh.param("gyr_sigma_y", gyr_sgm_y,      0.001);
+    nh.param("gyr_sigma_z", gyr_sgm_z,      0.001);
 
     double acc_bias_sgm_x, acc_bias_sgm_y, acc_bias_sgm_z;
     double gyr_bias_sgm_x, gyr_bias_sgm_y, gyr_bias_sgm_z;
-    nh.param("acc_bias_sigma_x", acc_bias_sgm_x,      0.0001);
-    nh.param("acc_bias_sigma_y", acc_bias_sgm_y,      0.0001);
-    nh.param("acc_bias_sigma_z", acc_bias_sgm_z,      0.0001);
-    nh.param("gyr_bias_sigma_x", gyr_bias_sgm_x,      0.0001);
-    nh.param("gyr_bias_sigma_y", gyr_bias_sgm_y,      0.0001);
-    nh.param("gyr_bias_sigma_z", gyr_bias_sgm_z,      0.0001);
+    nh.param("acc_bias_sigma_x", acc_bias_sgm_x,      0.00001);
+    nh.param("acc_bias_sigma_y", acc_bias_sgm_y,      0.00001);
+    nh.param("acc_bias_sigma_z", acc_bias_sgm_z,      0.00001);
+    nh.param("gyr_bias_sigma_x", gyr_bias_sgm_x,      0.00001);
+    nh.param("gyr_bias_sigma_y", gyr_bias_sgm_y,      0.00001);
+    nh.param("gyr_bias_sigma_z", gyr_bias_sgm_z,      0.00001);
 
     _acc_sgm.setValue(acc_sgm_x, acc_sgm_y, acc_sgm_z);
     _gyr_sgm.setValue(gyr_sgm_x, gyr_sgm_y, gyr_sgm_z);
@@ -76,6 +76,9 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
     _model_pub = nh.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 100);
     _imu_pub   = nh.advertise<sensor_msgs::Imu>("/dji_sim/imu", 100);
     _pose_pub  = nh.advertise<geometry_msgs::PoseStamped>("/dji_sim/pose", 100);
+    _force_pub = nh.advertise<geometry_msgs::Point>("/dji_sim/control/force", 100);
+    _torque_pub= nh.advertise<geometry_msgs::Point>("/dji_sim/control/torque", 100);
+
     _imu_queue.empty();
 
     _acc_noise.setZero();
@@ -152,10 +155,11 @@ void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
 //            ROS_INFO("robot_control: pose round = %0.1f", _pose_round);
             update_time();
             update_control();
+            publish_control();
             update_state();
             publish_state();
             publish_tf();
-            generate_noise();
+//            generate_noise();
             publish_imu();
             publish_pose();
             return;
@@ -286,6 +290,10 @@ void RobotControl::publish_imu()
     imu_accelerometer =_rot_gazebo_to_base.transpose() * (_linear_acceleration + gravity_vector);
     imu_gyroscope     = _rot_gazebo_to_base.transpose() * _angular_velocity;
     _rot_world_to_base.getRotation(imu_quaternion);
+
+//    ROS_INFO("robot_control: linear_acceleration %0.3f %0.3f %0.3f", _linear_acceleration[0], _linear_acceleration[1], _linear_acceleration[2]);
+//    ROS_INFO("robot_control: linear_acceleration %0.3f %0.3f %0.3f", imu_accelerometer[0], imu_accelerometer[1], imu_accelerometer[2]);
+
     sensor_msgs::Imu msg;
 
     msg.header.frame_id = "base_link";
@@ -349,3 +357,23 @@ void RobotControl::publish_pose()
 
     _pose_pub.publish(msg);
 }
+
+void RobotControl::publish_control()
+{
+    geometry_msgs::Point force_msg;
+
+    force_msg.x = _force.x();
+    force_msg.y = _force.y();
+    force_msg.z = _force.z();
+
+    _force_pub.publish(force_msg);
+
+    geometry_msgs::Point torque_msg;
+
+    torque_msg.x = _torque.x();
+    torque_msg.y = _torque.y();
+    torque_msg.z = _torque.z();
+
+    _torque_pub.publish(torque_msg);
+}
+
