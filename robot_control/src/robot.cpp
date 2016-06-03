@@ -4,6 +4,24 @@ template <typename T> double sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
 
+double compute_median(std::vector<double> in)
+{
+  double median;
+  size_t size = in.size();
+
+  sort(in.begin(), in.end());
+
+  if (size  % 2 == 0)
+  {
+      median = (in[size / 2 - 1] + in[size / 2]) / 2;
+  }
+  else
+  {
+      median = in[size / 2];
+  }
+
+  return median;
+}
 RobotControl::RobotControl(ros::NodeHandle &nh)
 {
     nh.param("mass",        _mass,          1.0);
@@ -78,8 +96,7 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
     _pose_pub  = nh.advertise<geometry_msgs::PoseStamped>("/dji_sim/pose", 100);
     _force_pub = nh.advertise<geometry_msgs::Point>("/dji_sim/control/force", 100);
     _torque_pub= nh.advertise<geometry_msgs::Point>("/dji_sim/control/torque", 100);
-
-    _imu_queue.empty();
+    _err_pub= nh.advertise<geometry_msgs::Point>("/dji_sim/position_err", 100);
 
     _acc_noise.setZero();
     _gyr_noise.setZero();
@@ -92,7 +109,14 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
     _rot_gazebo_to_base.setIdentity();
     _rot_world_to_gazebo.setRPY(M_PI, 0.0, 0.0);
 
+    _pos_err_d_vec_x.empty();
+    _pos_err_d_vec_y.empty();
+    _pos_err_d_vec_z.empty();
 
+    _ori_err_d_vec_x.empty();
+    _ori_err_d_vec_y.empty();
+    _ori_err_d_vec_z.empty();
+    _err_count = 0;
 }
 
 void RobotControl::target_callback(const geometry_msgs::Pose::Ptr msg)
@@ -152,14 +176,14 @@ void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
 
             _orientation_prev = _orientation;
             _orientation[2] += 2.0*M_PI*_pose_round;
-//            ROS_INFO("robot_control: pose round = %0.1f", _pose_round);
+
             update_time();
             update_control();
             publish_control();
             update_state();
             publish_state();
             publish_tf();
-//            generate_noise();
+            generate_noise();
             publish_imu();
             publish_pose();
             return;
@@ -180,8 +204,9 @@ void RobotControl::update_time()
     }
     _time_old = _time;
 
-    if(fabs(_dt) > 1.5 * 1.0 / _freq || fabs(_dt) < 0.7 * 1.0 / _freq) {
-        _dt = 1.0 / _freq;
+    if(fabs(_dt) > 1.5 / _freq || fabs(_dt) < 0.7 / _freq) {
+//        ROS_WARN("robot_control: dt = %0.4f", _dt);
+        _dt = 1.0/_freq;
     }
 }
 
@@ -200,7 +225,44 @@ void RobotControl::update_control()
     else {
         _pos_err_d = (_pos_err - _pos_err_prev) / _dt;
         _ori_err_d = (_ori_err - _ori_err_prev) / _dt;
+
+        unsigned int filter_size = 5;
+        if(_pos_err_d_vec_x.size() < filter_size ) {
+            _pos_err_d_vec_x.push_back(_pos_err_d.x());
+            _pos_err_d_vec_y.push_back(_pos_err_d.y());
+            _pos_err_d_vec_z.push_back(_pos_err_d.z());
+
+            _ori_err_d_vec_x.push_back(_ori_err_d.x());
+            _ori_err_d_vec_y.push_back(_ori_err_d.y());
+            _ori_err_d_vec_z.push_back(_ori_err_d.z());
+        }
+        else {
+            int idx = _err_count % filter_size;
+            _pos_err_d_vec_x[idx] = _pos_err_d.x();
+            _pos_err_d_vec_y[idx] = _pos_err_d.y();
+            _pos_err_d_vec_z[idx] = _pos_err_d.z();
+
+            _ori_err_d_vec_x[idx] = _ori_err_d.x();
+            _ori_err_d_vec_y[idx] = _ori_err_d.y();
+            _ori_err_d_vec_z[idx] = _ori_err_d.z();
+
+            _err_count++;
+        }
+
+        _pos_err_d.setX(compute_median(_pos_err_d_vec_x));
+        _pos_err_d.setY(compute_median(_pos_err_d_vec_y));
+        _pos_err_d.setZ(compute_median(_pos_err_d_vec_z));
+        _ori_err_d.setX(compute_median(_ori_err_d_vec_x));
+        _ori_err_d.setY(compute_median(_ori_err_d_vec_y));
+        _ori_err_d.setZ(compute_median(_ori_err_d_vec_z));
     }
+
+    geometry_msgs::Point err_msg;
+    err_msg.x = _pos_err_d.x();
+    err_msg.y = _pos_err_d.y();
+    err_msg.z = _pos_err_d.z();
+    _err_pub.publish(err_msg);
+//    ROS_INFO("robot_control: dt = %0.3f", _dt);
 
     // integral of error
     _pos_err_i = _pos_err_i + _pos_err;
@@ -285,11 +347,10 @@ void RobotControl::publish_imu()
 
     tf::Vector3 imu_accelerometer(0.0, 0.0, 0.0);
     tf::Vector3 imu_gyroscope(0.0, 0.0, 0.0);
-    tf::Quaternion imu_quaternion;
 
     imu_accelerometer =_rot_gazebo_to_base.transpose() * (_linear_acceleration + gravity_vector);
     imu_gyroscope     = _rot_gazebo_to_base.transpose() * _angular_velocity;
-    _rot_world_to_base.getRotation(imu_quaternion);
+    _rot_world_to_base.getRotation(_imu_quaternion);
 
 //    ROS_INFO("robot_control: linear_acceleration %0.3f %0.3f %0.3f", _linear_acceleration[0], _linear_acceleration[1], _linear_acceleration[2]);
 //    ROS_INFO("robot_control: linear_acceleration %0.3f %0.3f %0.3f", imu_accelerometer[0], imu_accelerometer[1], imu_accelerometer[2]);
@@ -307,10 +368,10 @@ void RobotControl::publish_imu()
     msg.linear_acceleration.y = imu_accelerometer.y() + _acc_noise.y();
     msg.linear_acceleration.z = imu_accelerometer.z() + _acc_noise.z();
 
-    msg.orientation.w = imu_quaternion.w();
-    msg.orientation.x = imu_quaternion.x();
-    msg.orientation.y = imu_quaternion.y();
-    msg.orientation.z = imu_quaternion.z();
+    msg.orientation.w = _imu_quaternion.w();
+    msg.orientation.x = _imu_quaternion.x();
+    msg.orientation.y = _imu_quaternion.y();
+    msg.orientation.z = _imu_quaternion.z();
 
     _imu_pub.publish(msg);
 
@@ -347,13 +408,13 @@ void RobotControl::publish_pose()
     msg.header.stamp = ros::Time::now();
 
     msg.pose.position.x = _position.x();
-    msg.pose.position.y = _position.y();
-    msg.pose.position.z = _position.z();
+    msg.pose.position.y = -_position.y();
+    msg.pose.position.z = -_position.z();
 
-    msg.pose.orientation.w = _quaternion.w();
-    msg.pose.orientation.x = _quaternion.x();
-    msg.pose.orientation.y = _quaternion.y();
-    msg.pose.orientation.z = _quaternion.z();
+    msg.pose.orientation.w = _imu_quaternion.w();
+    msg.pose.orientation.x = _imu_quaternion.x();
+    msg.pose.orientation.y = _imu_quaternion.y();
+    msg.pose.orientation.z = _imu_quaternion.z();
 
     _pose_pub.publish(msg);
 }

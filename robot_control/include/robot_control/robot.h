@@ -70,10 +70,9 @@ private:
     double _MAX_LINEAR_VEL, _MAX_ANGULAR_VEL;
 
     ros::Subscriber _model_sub, _target_sub;
-    ros::Publisher  _model_pub, _pose_pub, _imu_pub, _force_pub, _torque_pub;
+    ros::Publisher  _model_pub, _pose_pub, _imu_pub, _force_pub, _torque_pub, _err_pub;
 
     double _gravity;
-    std::queue<sensor_msgs::Imu> _imu_queue;
     tf::Vector3 _acc_noise, _acc_sgm;
     tf::Vector3 _gyr_noise, _gyr_sgm;
 
@@ -89,6 +88,12 @@ private:
     tf::Matrix3x3 _rot_gazebo_to_base;
     tf::Matrix3x3 _rot_world_to_gazebo;
     tf::Matrix3x3 _rot_world_to_base;
+
+    tf::Quaternion _imu_quaternion;
+
+    std::vector<double> _pos_err_d_vec_x, _pos_err_d_vec_y, _pos_err_d_vec_z;
+    std::vector<double> _ori_err_d_vec_x, _ori_err_d_vec_y, _ori_err_d_vec_z;
+    int _err_count;
 
 };
 #endif // ROBOT_H

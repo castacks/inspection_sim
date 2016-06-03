@@ -16,9 +16,9 @@
     <param name="max_linear_vel"    type="double"           value="2.0"/>
     <param name="max_angular_vel"   type="double"           value="2.0"/>
 
-	<param name="acc_sigma_x"		type="double"			value="0.0"/>
-	<param name="acc_sigma_y"		type="double"			value="0.0"/>
-	<param name="acc_sigma_z"		type="double"			value="0.0"/>
+	<param name="acc_sigma_x"		type="double"			value="0.01"/>
+	<param name="acc_sigma_y"		type="double"			value="0.01"/>
+	<param name="acc_sigma_z"		type="double"			value="0.01"/>
 
 	<param name="gyr_sigma_x"		type="double"			value="0.001"/>
 	<param name="gyr_sigma_y"		type="double"			value="0.001"/>
