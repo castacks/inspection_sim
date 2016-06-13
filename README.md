@@ -32,8 +32,12 @@ rostopic pub -r 10 /dji_sim/target_pose geometry_msgs/Pose "{position: {z: 1.0},
 ```
 roslaunch lidar_ekf dji_gazebo.launch 
 ```
+6 By default, gimbal stays in zero configuration. It listens to ```/dji_sim/gimbal_target``` such that gimbal orientation is controlled in robot body frame.
 
-6 You should see the simulation like following figure.
+```
+roslaunch gimbal_control gimbal_control.launch
+```
+7 You should see the simulation like following figure.
 ![dji_sim.png](https://bitbucket.org/repo/gBoX7x/images/985936132-dji_sim.png)
 
 ### Who do I talk to? ###
