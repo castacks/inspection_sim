@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<launch>
+  
+  <node name="gimbal_control" pkg="gimbal_control" type="gimbal_control_node" output="screen">
+  	<param name="gimbal_velocity"		value="60.0"/>  #degrees per second
+  </node>
+
+</launch>
