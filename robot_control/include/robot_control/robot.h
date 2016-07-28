@@ -6,6 +6,7 @@
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
 #include <geometry_msgs/Pose.h>
+#include <nav_msgs/Odometry.h>
 #include <sensor_msgs/Imu.h>
 #include <gazebo_msgs/ModelState.h>
 #include <gazebo_msgs/ModelStates.h>
@@ -29,6 +30,7 @@ public:
     void publish_tf();
     void publish_imu();
     void publish_pose();
+    void publish_odom();
     void publish_control();
     bool check_reach();
     void generate_noise();
@@ -70,7 +72,8 @@ private:
     double _MAX_LINEAR_VEL, _MAX_ANGULAR_VEL;
 
     ros::Subscriber _model_sub, _target_sub;
-    ros::Publisher  _model_pub, _pose_pub, _imu_pub, _force_pub, _torque_pub, _err_pub;
+    ros::Publisher  _model_pub, _force_pub, _torque_pub, _err_pub;
+    ros::Publisher  _odom_pub, _pose_pub, _imu_pub;
 
     double _gravity;
     tf::Vector3 _acc_noise, _acc_sgm;

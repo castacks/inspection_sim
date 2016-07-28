@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /TF1/Frames1
+        - /dji_sim/odometry1/Status1
       Splitter Ratio: 0.492574
     Tree Height: 475
   - Class: rviz/Selection
@@ -106,6 +107,8 @@ Visualization Manager:
           Value: false
         gazebo_world:
           Value: false
+        hokuyo_link:
+          Value: true
         world:
           Value: true
       Marker Scale: 1
@@ -116,7 +119,14 @@ Visualization Manager:
       Tree:
         world:
           gazebo_world:
-            {}
+            dji_link:
+              base_link:
+                {}
+              camera_link:
+                camera:
+                  {}
+              hokuyo_link:
+                {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -188,6 +198,16 @@ Visualization Manager:
       Topic: /lidar_ekf/ekf_pose
       Unreliable: false
       Value: false
+    - Angle Tolerance: 0.01
+      Class: rviz/Odometry
+      Color: 255; 25; 0
+      Enabled: true
+      Keep: 1
+      Length: 1
+      Name: dji_sim/odometry
+      Position Tolerance: 0.01
+      Topic: /dji_sim/odometry
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 255; 255; 255
@@ -212,7 +232,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/ThirdPersonFollower
-      Distance: 48.4851
+      Distance: 9.20432
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
@@ -224,10 +244,10 @@ Visualization Manager:
         Z: -6
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.545398
+      Pitch: 0.715398
       Target Frame: dji_link
       Value: ThirdPersonFollower (rviz)
-      Yaw: 4.57909
+      Yaw: 3.00909
     Saved:
       - Class: rviz/XYOrbit
         Distance: 22.1068

@@ -94,6 +94,7 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
     _model_pub = nh.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 100);
     _imu_pub   = nh.advertise<sensor_msgs::Imu>("/dji_sim/imu", 100);
     _pose_pub  = nh.advertise<geometry_msgs::PoseStamped>("/dji_sim/pose", 100);
+    _odom_pub  = nh.advertise<nav_msgs::Odometry>("/dji_sim/odometry", 100);
     _force_pub = nh.advertise<geometry_msgs::Point>("/dji_sim/control/force", 100);
     _torque_pub= nh.advertise<geometry_msgs::Point>("/dji_sim/control/torque", 100);
     _err_pub= nh.advertise<geometry_msgs::Point>("/dji_sim/position_err", 100);
@@ -186,6 +187,7 @@ void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
             generate_noise();
             publish_imu();
             publish_pose();
+            publish_odom();
             return;
         }
     }
@@ -415,8 +417,34 @@ void RobotControl::publish_pose()
     msg.pose.orientation.x = _imu_quaternion.x();
     msg.pose.orientation.y = _imu_quaternion.y();
     msg.pose.orientation.z = _imu_quaternion.z();
+}
 
-    _pose_pub.publish(msg);
+void RobotControl::publish_odom()
+{
+    nav_msgs::Odometry msg;
+    msg.header.frame_id = "world";
+    msg.header.stamp = ros::Time::now();
+
+    msg.pose.pose.position.x = _position.x();
+    msg.pose.pose.position.y = -_position.y();
+    msg.pose.pose.position.z = -_position.z();
+
+    msg.pose.pose.orientation.w = _imu_quaternion.w();
+    msg.pose.pose.orientation.x = _imu_quaternion.x();
+    msg.pose.pose.orientation.y = _imu_quaternion.y();
+    msg.pose.pose.orientation.z = _imu_quaternion.z();
+
+    for(int i=0; i<6; i++) {
+        for(int j=0; j<6; j++) {
+            if(i == j) {
+                msg.pose.covariance[i*6+j] = 0.4*0.4;
+            } else {
+                msg.pose.covariance[i*6+j] = 0.0;
+            }
+        }
+    }
+
+    _odom_pub.publish(msg);
 }
 
 void RobotControl::publish_control()
