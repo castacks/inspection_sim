@@ -29,6 +29,7 @@ public:
     void publish_state();
     void publish_tf();
     void publish_imu();
+    void publish_bias();
     void publish_pose();
     void publish_odom();
     void publish_control();
@@ -73,7 +74,7 @@ private:
 
     ros::Subscriber _model_sub, _target_sub;
     ros::Publisher  _model_pub, _force_pub, _torque_pub, _err_pub;
-    ros::Publisher  _odom_pub, _pose_pub, _imu_pub;
+    ros::Publisher  _odom_pub, _pose_pub, _imu_pub, _bias_pub;
 
     double _gravity;
     tf::Vector3 _acc_noise, _acc_sgm;

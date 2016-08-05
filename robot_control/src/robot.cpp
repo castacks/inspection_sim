@@ -93,6 +93,7 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
 
     _model_pub = nh.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 100);
     _imu_pub   = nh.advertise<sensor_msgs::Imu>("/dji_sim/imu", 100);
+    _bias_pub  = nh.advertise<geometry_msgs::TwistStamped>("/dji_sim/bias", 100);
     _pose_pub  = nh.advertise<geometry_msgs::PoseStamped>("/dji_sim/pose", 100);
     _odom_pub  = nh.advertise<nav_msgs::Odometry>("/dji_sim/odometry", 100);
     _force_pub = nh.advertise<geometry_msgs::Point>("/dji_sim/control/force", 100);
@@ -186,6 +187,7 @@ void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
             publish_tf();
             generate_noise();
             publish_imu();
+            publish_bias();
             publish_pose();
             publish_odom();
             return;
@@ -379,6 +381,23 @@ void RobotControl::publish_imu()
 
 }
 
+void RobotControl::publish_bias()
+{
+    geometry_msgs::TwistStamped msg;
+
+    msg.header.frame_id = "world";
+    msg.header.stamp = ros::Time::now();
+
+    msg.twist.linear.x = _acc_bias.x();
+    msg.twist.linear.y = _acc_bias.y();
+    msg.twist.linear.z = _acc_bias.z();
+
+    msg.twist.angular.x = _gyr_bias.x();
+    msg.twist.angular.y = _gyr_bias.y();
+    msg.twist.angular.z = _gyr_bias.z();
+
+    _bias_pub.publish(msg);
+}
 void RobotControl::generate_noise()
 {
     for(int i=0; i<3; i++) {
