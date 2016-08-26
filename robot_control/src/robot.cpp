@@ -463,6 +463,13 @@ void RobotControl::publish_odom()
         }
     }
 
+    msg.twist.twist.linear.x = _linear_velocity.x();
+    msg.twist.twist.linear.y = -_linear_velocity.y();
+    msg.twist.twist.linear.z = -_linear_velocity.z();
+
+    msg.twist.twist.angular.x = _angular_velocity.x();
+    msg.twist.twist.angular.y = _angular_velocity.y();
+    msg.twist.twist.angular.z = _angular_velocity.z();
     _odom_pub.publish(msg);
 }
 

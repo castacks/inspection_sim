@@ -6,6 +6,8 @@ Panels:
       Expanded:
         - /Global Options1
         - /TF1/Frames1
+        - /sync_cloud1
+        - /eskf_test/odom1
       Splitter Ratio: 0.492574
     Tree Height: 475
   - Class: rviz/Selection
@@ -116,8 +118,8 @@ Visualization Manager:
       Class: rviz/PointCloud2
       Color: 85; 170; 255
       Color Transformer: FlatColor
-      Decay Time: 20
-      Enabled: false
+      Decay Time: 10
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -134,7 +136,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
     - Class: rviz/MarkerArray
       Enabled: false
       Marker Topic: /occupied_cells_vis_array
@@ -164,7 +166,7 @@ Visualization Manager:
       Axes Radius: 0.05
       Class: rviz/Pose
       Color: 255; 25; 0
-      Enabled: false
+      Enabled: true
       Head Length: 0.3
       Head Radius: 0.1
       Name: ekf_pose
@@ -173,7 +175,7 @@ Visualization Manager:
       Shape: Axes
       Topic: /lidar_ekf/ekf_pose
       Unreliable: false
-      Value: false
+      Value: true
     - Angle Tolerance: 0.001
       Class: rviz/Odometry
       Color: 255; 25; 0
@@ -184,15 +186,15 @@ Visualization Manager:
       Position Tolerance: 0.01
       Topic: /dji_sim/odometry
       Value: true
-    - Angle Tolerance: 0.001
+    - Angle Tolerance: 0.01
       Class: rviz/Odometry
       Color: 0; 0; 255
       Enabled: true
       Keep: 1
       Length: 1
-      Name: Odometry
+      Name: eskf_test/odom
       Position Tolerance: 0.01
-      Topic: /eskf_test/imu_odom
+      Topic: /eskf_test/odom
       Value: true
   Enabled: true
   Global Options:
@@ -218,7 +220,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/ThirdPersonFollower
-      Distance: 11.9752
+      Distance: 55.3693
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
@@ -230,10 +232,10 @@ Visualization Manager:
         Z: -6
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.740398
+      Pitch: 1.5698
       Target Frame: dji_link
       Value: ThirdPersonFollower (rviz)
-      Yaw: 3.15408
+      Yaw: 0.0040803
     Saved:
       - Class: rviz/XYOrbit
         Distance: 22.1068
@@ -268,7 +270,7 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1280
-  X: 1910
-  Y: 14
+  X: 902
+  Y: 137
   camera:
     collapsed: false

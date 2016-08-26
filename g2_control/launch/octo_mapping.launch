@@ -1,15 +1,17 @@
 <?xml version="1.0" ?>
 <launch>
-  
+ 
+  <param name="use_sime_time" value="true" />
+
   <node pkg="rosbag" type="play" name="playbag" output="screen"
-          args="--pause --clock --rate 0.3 $(find g2_control)/dat/bridge_sim.bag"/>
+          args="--pause --clock --rate 0.1 $(find g2_control)/dat/dji_sim.bag"/>
                 
   <node name="rviz_viz" pkg="rviz" type="rviz" args="-d $(find dji_gazebo)/rviz/dji_sim.rviz"/>
   
   <node name="octomap_server_node" pkg="octomap_server" type="octomap_server_node">
     <remap from="/cloud_in" to="/dji_sim/laser/pointcloud"/>
     <param name="frame_id"  value="world"/>   
-    <param name="resolution"  value="0.2"/>  
+    <param name="resolution"  value="0.05"/>  
     <param name="latch"  value="false"/> 
   </node>
 	
