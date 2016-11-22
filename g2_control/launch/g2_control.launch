@@ -15,7 +15,7 @@
   </node>
   
   <node name="g2_control" pkg="g2_control" type="g2_control_node" output="screen">
-    <param name="spin_freq" type="double" value="2"/>
+    <param name="spin_freq" type="double" value="1"/>
   </node>
 
 </launch>
