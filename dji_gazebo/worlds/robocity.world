@@ -34,26 +34,27 @@
     </include>
     
     <model name="bridge">
-      <pose>1 -6 4  0 0 0</pose>
+      <pose>-7 -17 8.5  0 0 0</pose>
       <static>true</static>
       <link name="body">
         <visual name="visual">
           <geometry>
-            <mesh><uri>file:///home/slz/inspection_ws/src/inspection_sim/dji_gazebo/models/bridge_model.dae</uri></mesh>
+
+            <mesh>
+              <uri>file:///home/slz/inspection_ws/src/inspection_sim/dji_gazebo/models/robotcity.STL</uri>
+              <scale>0.0254 0.0254 0.0254</scale>
+            </mesh>
           </geometry>
         </visual>
         
         <collision name="collision">
           <geometry>
-	        <mesh><uri>file:///home/slz/inspection_ws/src/inspection_sim/dji_gazebo/models/bridge_model.dae</uri></mesh>
+            <mesh>
+              <uri>file:///home/slz/inspection_ws/src/inspection_sim/dji_gazebo/models/robotcity.STL</uri>
+              <scale>0.0254 0.0254 0.0254</scale>
+            </mesh>
           </geometry>
         </collision>
-
-        <sensor name='bridge_contact' type='contact'>
-          <contact>
-            <collision>collision</collision>
-          </contact>
-        </sensor>
 
       </link>
     </model>
