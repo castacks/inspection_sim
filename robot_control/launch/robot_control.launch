@@ -10,6 +10,9 @@
     <param name="pos_p"             type="double"           value="5.0"/>
     <param name="pos_i"             type="double"           value="0.0"/>
     <param name="pos_d"             type="double"           value="5.0"/>
+
+    <param name="vel_p"             type="double"           value="5.0"/>
+
     <param name="ori_p"             type="double"           value="2.0"/>
     <param name="ori_i"             type="double"           value="0.0"/>
     <param name="ori_d"             type="double"           value="3.0"/>
@@ -33,5 +36,5 @@
 	<param name="gyr_bias_sigma_z"		type="double"			value="0.001"/>
   </node>
 
-  <include file="$(find robot_control)/launch/js_control.launch"/>
+<!--   <include file="$(find robot_control)/launch/js_control.launch"/> -->
 </launch>

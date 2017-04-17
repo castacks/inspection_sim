@@ -8,6 +8,7 @@
 #include <geometry_msgs/Pose.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/Imu.h>
+#include <std_msgs/Bool.h>
 #include <gazebo_msgs/ModelState.h>
 #include <gazebo_msgs/ModelStates.h>
 #include "boost/random.hpp"
@@ -18,13 +19,15 @@ typedef boost::variate_generator<boost::mt19937&, boost::normal_distribution<> >
 class RobotControl {
 
 public:
-    RobotControl(ros::NodeHandle &nh);
+    RobotControl();
     ~RobotControl() {}
 
     void target_callback(const geometry_msgs::Pose::Ptr msg);
     void pose_callback(const gazebo_msgs::ModelStates::Ptr &msg);
+    void target_vel_callback(const geometry_msgs::Twist::Ptr msg);
     void update_time();
     void update_control();
+    void update_velocity_control();
     void update_state();
     void publish_state();
     void publish_tf();
@@ -35,6 +38,9 @@ public:
     void publish_control();
     bool check_reach();
     void generate_noise();
+    void reset(const std_msgs::Bool &msg);
+
+    ros::NodeHandle nh;
 private:
 
     double _time, _time_old, _dt;
@@ -46,7 +52,9 @@ private:
     tf::Vector3 _linear_acceleration;
     tf::Vector3 _linear_velocity;
     tf::Vector3 _position;
-
+    tf::Matrix3x3 _orientation_matrix;
+    // tf::Vector3 _robot_target;
+    
     double _inertia;
     double _target_round, _pose_round;
     tf::Vector3 _torque;
@@ -59,7 +67,8 @@ private:
     tf::Vector3 _target_position;
     tf::Vector3 _target_orientation;
     tf::Vector3 _target_orientation_prev;
-
+    tf::Vector3 _target_velocity;
+    tf::Vector3 _target_angular_velocity;
 
     double _pos_p, _pos_i, _pos_d;
     double _ori_p, _ori_i, _ori_d;
@@ -69,13 +78,22 @@ private:
     tf::Vector3 _pos_err, _ori_err;
     tf::Vector3 _pos_err_prev, _ori_err_prev;
 
+    double _vel_p, _vel_i, _vel_d;
+    double _ang_vel_p, _ang_vel_i, _ang_vel_d;
+
+    tf::Vector3 _vel_err_i, _ang_vel_err_i;
+    tf::Vector3 _vel_err_d, _ang_vel_err_d;
+    tf::Vector3 _vel_err, _ang_vel_err;
+    tf::Vector3 _vel_err_prev, _ang_vel_err_prev;
+
     double _MAX_FORCE, _MAX_TORQUE;
     double _MAX_LINEAR_VEL, _MAX_ANGULAR_VEL;
 
-    ros::Subscriber _model_sub, _target_sub;
+    ros::Subscriber _model_sub, _target_sub, _vel_target_sub, _is_done_sub;
     ros::Publisher  _model_pub, _force_pub, _torque_pub, _err_pub;
     ros::Publisher  _odom_pub, _pose_pub, _imu_pub, _bias_pub;
-
+    // _robot_target_pub
+    
     double _gravity;
     tf::Vector3 _acc_noise, _acc_sgm;
     tf::Vector3 _gyr_noise, _gyr_sgm;
@@ -97,6 +115,9 @@ private:
 
     std::vector<double> _pos_err_d_vec_x, _pos_err_d_vec_y, _pos_err_d_vec_z;
     std::vector<double> _ori_err_d_vec_x, _ori_err_d_vec_y, _ori_err_d_vec_z;
+
+    std::vector<double> _vel_err_d_vec_x, _vel_err_d_vec_y, _vel_err_d_vec_z;
+    std::vector<double> _ang_vel_err_d_vec_x, _ang_vel_err_d_vec_y, _ang_vel_err_d_vec_z;
     int _err_count;
 
 };

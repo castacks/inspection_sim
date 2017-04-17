@@ -7,7 +7,7 @@
       <shadows>false</shadows>
     </scene>
     <physics type="ode">
-      <gravity>0 0 -9.8</gravity>
+      <gravity>0 0 0</gravity>
       <ode>
         <solver>
           <type>quick</type>

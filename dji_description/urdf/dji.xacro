@@ -5,8 +5,8 @@
   <!-- Constants for robot dimensions -->
   <xacro:property name="PI" value="3.1415926535897931"/>
   <xacro:property name="mass" value="30" /> <!-- arbitrary value for mass -->
-  <xacro:property name="width" value="1.0" /> <!-- Square dimensions (widthxwidth) of beams -->
-  <xacro:property name="height" value="1.0" /> <!-- DJI height -->
+  <xacro:property name="width" value="0.1" /> <!-- Square dimensions (widthxwidth) of beams -->
+  <xacro:property name="height" value="0.4" /> <!-- DJI height -->
 
   <!-- Import all Gazebo-customization elements, including Gazebo colors -->
   <xacro:include filename="$(find dji_description)/urdf/dji.gazebo" />
@@ -15,12 +15,14 @@
   
   <!-- DJI Body Link -->
   <link name="dji_link">
-    <collision name="dji_body_collision">
-      <origin xyz="0 0 ${height/2}" rpy="0 0 0"/>
-      <geometry>
-	    <box size="${width} ${width} ${height}"/>
-      </geometry>
-    </collision> 
+    <!-- <collision name="dji_body_collision"> -->
+      <!-- <origin xyz="0 0 ${height/2}" rpy="0 0 0"/> -->
+      <!-- <geometry> -->
+          <!-- <sphere radius ="1.25" /> -->
+      <!-- </geometry> -->
+    <!-- </collision>  -->
+
+
 
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -39,13 +41,6 @@
 	  iyy="${mass / 12.0 * (height*height + width*width)}" iyz="0.0"
 	  izz="${mass / 12.0 * (width*width + width*width)}"/>
     </inertial>
-<!-- 
-    <sensor name='dji_body_collision' type='contact'>
-      <contact>
-        <collision>collision</collision>
-      </contact>
-    </sensor> -->
-
   </link>
 
   <joint name="hokuyo_joint" type="continuous">
@@ -57,11 +52,11 @@
   </joint>
 
   <!-- Hokuyo Laser -->
-  <link name="hokuyo_link">
+  <link name="hokuyo_link" selfCollide="false">
     <collision>
       <origin xyz="0 0 0.0" rpy="0 0 0"/>
       <geometry>
-	    <box size="0.1 0.1 0.1"/>
+          <sphere radius ="1.25" />
       </geometry>
     </collision>
 
@@ -80,38 +75,6 @@
     </inertial>
   </link>
 
-  <joint name="camera_joint" type="continuous">
-    <axis xyz="0 0 1" />
-    <origin xyz="0.18 0 0.2" rpy="0 0 0"/>
-    <parent link="dji_link"/>
-    <child link="camera_link"/>
-  </joint>
-
-  <!-- Camera -->
-  <link name="camera_link">
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-	<box size="0.03 0.02 0.02"/>
-      </geometry>
-    </collision>
-
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0 "/>
-      <geometry>
-	    <box size="0.06 0.03 0.03"/> 
-	    <!-- <cylinder length="0.06" radius="0.02"/> -->
-      </geometry>
-      <material name="white"/>
-    </visual>
-
-    <inertial>
-      <mass value="1e-5" />
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
-    </inertial>
-  </link>
-  
   <transmission name="tran1">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="hokuyo_joint">
@@ -123,15 +86,4 @@
     </actuator>
   </transmission>
   
-  <transmission name="tran2">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="camera_joint">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="camera_motor">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-
 </robot>

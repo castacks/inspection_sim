@@ -22,8 +22,10 @@ double compute_median(std::vector<double> in)
 
   return median;
 }
-RobotControl::RobotControl(ros::NodeHandle &nh)
+RobotControl::RobotControl()
 {
+    nh = ros::NodeHandle("~");
+
     nh.param("mass",        _mass,          1.0);
     nh.param("inertia",     _inertia,       1.0);
     nh.param("freq",        _freq,          100.0);
@@ -35,6 +37,14 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
     nh.param("ori_p",       _ori_p,         1.0);
     nh.param("ori_i",       _ori_i,         0.0);
     nh.param("ori_d",       _ori_d,         1.0);
+
+    nh.param("vel_p",       _vel_p,         1.0);
+    nh.param("vel_i",       _vel_i,         0.0);
+    nh.param("vel_d",       _vel_d,         0.0);
+    nh.param("ang_vel_p",   _ang_vel_p,     1.0);
+    nh.param("ang_vel_i",   _ang_vel_i,     0.0);
+    nh.param("ang_vel_d",   _ang_vel_d,     0.1);
+
     nh.param("gravity",     _gravity,       9.8);
 
     nh.param("max_linear_vel",  _MAX_LINEAR_VEL,  0.5);
@@ -75,6 +85,8 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
     _target_position.setZero();
     _target_orientation.setZero();
     _target_orientation_prev.setZero();
+    _target_velocity.setZero();
+    _target_angular_velocity.setZero();
 
     _target_round = 0.0;
     _pose_round = 0.0;
@@ -90,6 +102,8 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
 
     _model_sub = nh.subscribe("/gazebo/model_states", 100, &RobotControl::pose_callback, this);
     _target_sub = nh.subscribe("/dji_sim/target_pose", 100, &RobotControl::target_callback, this);
+    _vel_target_sub = nh.subscribe("/dji_sim/target_velocity", 100, &RobotControl::target_vel_callback, this);
+    // _is_done_sub = nh.subscribe("/dji_sim/is_done", 100, &RobotControl::reset, this);
 
     _model_pub = nh.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 100);
     _imu_pub   = nh.advertise<sensor_msgs::Imu>("/dji_sim/imu", 100);
@@ -98,7 +112,8 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
     _odom_pub  = nh.advertise<nav_msgs::Odometry>("/dji_sim/odometry", 100);
     _force_pub = nh.advertise<geometry_msgs::Point>("/dji_sim/control/force", 100);
     _torque_pub= nh.advertise<geometry_msgs::Point>("/dji_sim/control/torque", 100);
-    _err_pub= nh.advertise<geometry_msgs::Point>("/dji_sim/position_err", 100);
+    _err_pub   = nh.advertise<geometry_msgs::Point>("/dji_sim/position_err", 100);
+    // _robot_target_pub = nh.advertise<geometry_msgs::Vector3>("/target_dir",100);
 
     _acc_noise.setZero();
     _gyr_noise.setZero();
@@ -120,6 +135,58 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
     _ori_err_d_vec_z.empty();
     _err_count = 0;
 }
+
+// void RobotControl::reset(const std_msgs::Bool &msg)
+// {   
+//     if(!msg.data){
+//         return;
+//     }
+//     _acc_bias.setZero();
+//     _gyr_bias.setZero();
+
+//     _init_time = true;
+//     _init_ctrl = true;
+//     _init_target = true;
+//     _init_pose = true;
+
+//     _target_position.setZero();
+//     _target_orientation.setZero();
+//     _target_orientation_prev.setZero();
+//     _target_velocity.setZero();
+//     _target_angular_velocity.setZero();
+
+//     _target_round = 0.0;
+//     _pose_round = 0.0;
+
+//     _linear_acceleration.setZero();
+//     _angular_acceleration.setZero();
+
+//     _linear_velocity.setZero();
+//     _angular_velocity.setZero();
+
+//     _pos_err_i.setZero();
+//     _ori_err_i.setZero();
+
+//     _acc_noise.setZero();
+//     _gyr_noise.setZero();
+//     _acc_bias_noise.setZero();
+//     _gyr_bias_noise.setZero();
+
+//     _rot_gazebo_to_dji.setIdentity();
+//     _rot_dji_to_base.setRPY(M_PI, 0.0, 0.0);
+//     _rot_world_to_base.setIdentity();
+//     _rot_gazebo_to_base.setIdentity();
+//     _rot_world_to_gazebo.setRPY(M_PI, 0.0, 0.0);
+
+//     _pos_err_d_vec_x.empty();
+//     _pos_err_d_vec_y.empty();
+//     _pos_err_d_vec_z.empty();
+
+//     _ori_err_d_vec_x.empty();
+//     _ori_err_d_vec_y.empty();
+//     _ori_err_d_vec_z.empty();
+//     _err_count = 0;
+// }
 
 void RobotControl::target_callback(const geometry_msgs::Pose::Ptr msg)
 {
@@ -152,6 +219,20 @@ void RobotControl::target_callback(const geometry_msgs::Pose::Ptr msg)
 
 }
 
+void RobotControl::target_vel_callback(const geometry_msgs::Twist::Ptr msg)
+{
+    tf::Vector3 world_velocity;
+
+    world_velocity[0] = msg->linear.x;
+    world_velocity[1] = msg->linear.y;
+    world_velocity[2] = msg->linear.z;
+    _target_velocity = _orientation_matrix*world_velocity;
+
+    _target_angular_velocity[0] = msg->angular.x;
+    _target_angular_velocity[1] = msg->angular.y;
+    _target_angular_velocity[2] = msg->angular.z;
+}
+
 void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
 {
     for(int i = 0; i < msg->name.size(); i++) {
@@ -162,7 +243,8 @@ void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
 
             tf::Quaternion q;
             tf::quaternionMsgToTF(msg->pose[i].orientation, q);
-            tf::Matrix3x3(q).getRPY(_orientation[0],_orientation[1],_orientation[2]);
+            _orientation_matrix = tf::Matrix3x3(q);
+            _orientation_matrix.getRPY(_orientation[0],_orientation[1],_orientation[2]);
 
             if(_init_pose) {
                 _orientation_prev = _orientation;
@@ -179,8 +261,10 @@ void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
             _orientation_prev = _orientation;
             _orientation[2] += 2.0*M_PI*_pose_round;
 
+
             update_time();
-            update_control();
+            // update_control();
+            update_velocity_control();
             publish_control();
             update_state();
             publish_state();
@@ -195,6 +279,13 @@ void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
     }
 
 }
+
+// void RobotControl::publish_robot_target()
+// {
+//     tf::Vector3 body_frame_target = _orientation_matrix*_robot_target;
+//     _robot_target_pub.publish(body_frame_target);
+// }
+
 void RobotControl::update_time()
 {
     _time = ros::Time::now().toSec();
@@ -291,6 +382,85 @@ void RobotControl::update_control()
     if(fabs(_torque[2]) > _MAX_TORQUE) _torque[2] = sgn(_torque[2]) * _MAX_TORQUE;
 
 }
+
+void RobotControl::update_velocity_control()
+{
+    // error
+    _vel_err = _target_velocity    - _linear_velocity;
+    _ang_vel_err = _target_angular_velocity - _angular_velocity;
+
+    // derivative of error
+    if(_init_ctrl) {
+        _vel_err_d.setZero();
+        _ang_vel_err_d.setZero();
+        _init_ctrl = false;
+    }
+    else {
+        _vel_err_d = (_vel_err - _vel_err_prev) / _dt;
+        _ang_vel_err_d = (_ang_vel_err - _ang_vel_err_prev) / _dt;
+
+        unsigned int filter_size = 5;
+        if(_vel_err_d_vec_x.size() < filter_size ) {
+            _vel_err_d_vec_x.push_back(_vel_err_d.x());
+            _vel_err_d_vec_y.push_back(_vel_err_d.y());
+            _vel_err_d_vec_z.push_back(_vel_err_d.z());
+
+            _ang_vel_err_d_vec_x.push_back(_ang_vel_err_d.x());
+            _ang_vel_err_d_vec_y.push_back(_ang_vel_err_d.y());
+            _ang_vel_err_d_vec_z.push_back(_ang_vel_err_d.z());
+        }
+        else {
+            int idx = _err_count % filter_size;
+            _vel_err_d_vec_x[idx] = _vel_err_d.x();
+            _vel_err_d_vec_y[idx] = _vel_err_d.y();
+            _vel_err_d_vec_z[idx] = _vel_err_d.z();
+
+            _ang_vel_err_d_vec_x[idx] = _ang_vel_err_d.x();
+            _ang_vel_err_d_vec_y[idx] = _ang_vel_err_d.y();
+            _ang_vel_err_d_vec_z[idx] = _ang_vel_err_d.z();
+
+            _err_count++;
+        }
+
+        _vel_err_d.setX(compute_median(_vel_err_d_vec_x));
+        _vel_err_d.setY(compute_median(_vel_err_d_vec_y));
+        _vel_err_d.setZ(compute_median(_vel_err_d_vec_z));
+        _ang_vel_err_d.setX(compute_median(_ang_vel_err_d_vec_x));
+        _ang_vel_err_d.setY(compute_median(_ang_vel_err_d_vec_y));
+        _ang_vel_err_d.setZ(compute_median(_ang_vel_err_d_vec_z));
+    }
+
+    geometry_msgs::Point err_msg;
+    err_msg.x = _vel_err_d.x();
+    err_msg.y = _vel_err_d.y();
+    err_msg.z = _vel_err_d.z();
+    _err_pub.publish(err_msg);
+//    ROS_INFO("robot_control: dt = %0.3f", _dt);
+
+    // integral of error
+    _vel_err_i = _vel_err_i + _vel_err;
+    _ang_vel_err_i = _ang_vel_err_i + _ang_vel_err;
+
+    // update prevous err
+    _vel_err_prev = _vel_err;
+    _ang_vel_err_prev = _ang_vel_err;
+
+    // PID control
+    _force  = _vel_err * _vel_p + _vel_i * _vel_err_i + _vel_d * _vel_err_d;
+    _torque = _ang_vel_err * _ang_vel_p + _ang_vel_i * _ang_vel_err_i + _ang_vel_d * _ang_vel_err_d;
+
+
+    // bound control input
+    if(fabs(_force[0]) > _MAX_FORCE) _force[0] = sgn(_force[0]) * _MAX_FORCE;
+    if(fabs(_force[1]) > _MAX_FORCE) _force[1] = sgn(_force[1]) * _MAX_FORCE;
+    if(fabs(_force[2]) > _MAX_FORCE) _force[2] = sgn(_force[2]) * _MAX_FORCE;
+
+    if(fabs(_torque[0]) > _MAX_TORQUE) _torque[0] = sgn(_torque[0]) * _MAX_TORQUE;
+    if(fabs(_torque[1]) > _MAX_TORQUE) _torque[1] = sgn(_torque[1]) * _MAX_TORQUE;
+    if(fabs(_torque[2]) > _MAX_TORQUE) _torque[2] = sgn(_torque[2]) * _MAX_TORQUE;
+
+}
+
 
 void RobotControl::update_state()
 {
