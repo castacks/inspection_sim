@@ -195,7 +195,7 @@ void G2Control::publish_state(const sensor_msgs::LaserScan &msg)
     // std::cout << roll << " "<< roll_bin << " " << _prev_roll << std::endl;
 
     sensor_msgs::PointCloud pc_msg;
-    _projector.transformLaserScanToPointCloud("/base_link",msg,pc_msg,_listener,30.0);
+    _projector.transformLaserScanToPointCloud("/base_link",msg,pc_msg,_listener,5.0);
 
     sensor_msgs::PointCloud2 pc2_msg;
     sensor_msgs::convertPointCloudToPointCloud2(pc_msg, pc2_msg);
@@ -223,9 +223,9 @@ void G2Control::publish_state(const sensor_msgs::LaserScan &msg)
         if((prev_index!=int(maxIndex))){
             _laser_state[maxIndex] = -10.0;
         }
-
-        if(distance < _laser_state[maxIndex] || (_laser_state[maxIndex] < 0)){
-            _laser_state[maxIndex] = distance;
+        int int_dist = floor(distance);
+        if(int_dist < _laser_state[maxIndex] || (_laser_state[maxIndex] < 0)){
+            _laser_state[maxIndex] = int_dist;
         }
         prev_index = int(maxIndex);
     }
@@ -259,13 +259,13 @@ void G2Control::publish_state(const sensor_msgs::LaserScan &msg)
         state_cloud.push_back(state_point);
     }
 
-    state_msg.data.push_back(_angular_velocity[0]);
-    state_msg.data.push_back(_angular_velocity[1]);
-    state_msg.data.push_back(_angular_velocity[2]);
+    // state_msg.data.push_back(_angular_velocity[0]);
+    // state_msg.data.push_back(_angular_velocity[1]);
+    // state_msg.data.push_back(_angular_velocity[2]);
 
-    state_msg.data.push_back(_linear_acceleration[0]);
-    state_msg.data.push_back(_linear_acceleration[1]);
-    state_msg.data.push_back(_linear_acceleration[2]);
+    // state_msg.data.push_back(_linear_acceleration[0]);
+    // state_msg.data.push_back(_linear_acceleration[1]);
+    // state_msg.data.push_back(_linear_acceleration[2]);
 
     state_msg.data.push_back(_target_dir[0]);
     state_msg.data.push_back(_target_dir[1]);
