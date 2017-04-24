@@ -13,12 +13,12 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
 )
 
-include_directories(${GAZEBO_INCLUDE_DIRS}, include)
-link_directories(${GAZEBO_LIBRARY_DIRS})
-list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
+#include_directories(${GAZEBO_INCLUDE_DIRS}, include)
+#link_directories(${GAZEBO_LIBRARY_DIRS})
+#list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
 
-add_library(contact SHARED src/ContactPlugin.cpp)
-target_link_libraries(contact ${GAZEBO_libraries})
+#add_library(contact SHARED src/ContactPlugin.cpp)
+#target_link_libraries(contact ${GAZEBO_libraries})
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)

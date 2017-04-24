@@ -43,7 +43,7 @@ public:
     // double _range_image[4][8];
     // double _range_image_final[4][8];
     std::vector<double> _laser_state;
-    int _prev_roll;
+    int _prev_roll, _N;
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     Eigen::MatrixXf _dirs;

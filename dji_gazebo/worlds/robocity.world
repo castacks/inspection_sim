@@ -22,8 +22,8 @@
         </constraints>
       </ode>      
       <max_step_size>0.01</max_step_size>
-      <real_time_factor>1</real_time_factor>
-      <real_time_update_rate>0</real_time_update_rate>  
+      <!-- <real_time_factor>1</real_time_factor> -->
+      <real_time_update_rate>1000</real_time_update_rate>  
     </physics>
     
     <include>
@@ -41,7 +41,7 @@
           <geometry>
 
             <mesh>
-              <uri>file:///home/slz/inspection_ws/src/inspection_sim/dji_gazebo/models/robotcity.STL</uri>
+              <uri>file:///home/szeng/inspection_ws/src/inspection_sim/dji_gazebo/models/robotcity.STL</uri>
               <scale>0.0254 0.0254 0.0254</scale>
             </mesh>
           </geometry>
@@ -50,7 +50,7 @@
         <collision name="collision">
           <geometry>
             <mesh>
-              <uri>file:///home/slz/inspection_ws/src/inspection_sim/dji_gazebo/models/robotcity.STL</uri>
+              <uri>file:///home/szeng/inspection_ws/src/inspection_sim/dji_gazebo/models/robotcity.STL</uri>
               <scale>0.0254 0.0254 0.0254</scale>
             </mesh>
           </geometry>

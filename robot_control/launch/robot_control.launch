@@ -4,7 +4,7 @@
   <node name="robot_control" pkg="robot_control" type="robot_control_node" output="screen">
     <param name="mass"              type="double"           value="1.0"/>
     <param name="inertia"           type="double"           value="0.2"/>
-    <param name="freq"              type="double"           value="100.0"/>
+    <param name="freq"              type="double"           value="10.0"/>
     <param name="max_force"         type="double"           value="5.0"/>
     <param name="max_torque"        type="double"           value="5.0"/>
     <param name="pos_p"             type="double"           value="5.0"/>
@@ -36,5 +36,5 @@
 	<param name="gyr_bias_sigma_z"		type="double"			value="0.001"/>
   </node>
 
-<!--   <include file="$(find robot_control)/launch/js_control.launch"/> -->
+  <include file="$(find robot_control)/launch/js_control.launch"/>
 </launch>

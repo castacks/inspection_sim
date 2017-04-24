@@ -24,47 +24,145 @@ G2Control::G2Control() {
 
     // std::vector<double> _laser_state;
 
-    for (int i = 0; i < 26; ++i)
-    {
-        _laser_state.push_back(-10.0);
-    }
 
 
-    _dirs = (Eigen::MatrixXf(26,3) << 1, 1, 1,
-                                      1, 1, 0,
-                                      1, 1,-1,
-                                      1, 0, 1,
-                                      1, 0, 0,
-                                      1, 0,-1,
-                                      1,-1, 1,
-                                      1,-1, 0,
-                                      1,-1,-1,
-                                      0, 1, 1,
-                                      0, 1, 0,
-                                      0, 1,-1,
-                                      0, 0, 1,
-                                      0, 0,-1,
-                                      0,-1, 1,
-                                      0,-1, 0,
-                                      0,-1,-1,
-                                     -1, 1, 1,
-                                     -1, 1, 0,
-                                     -1, 1,-1,
-                                     -1, 0, 1,
-                                     -1, 0, 0,
-                                     -1, 0,-1,
-                                     -1,-1, 1,
-                                     -1,-1, 0,
-                                     -1,-1,-1).finished();
+
+    // int N_count = 0;
+    // int N = 50;
+    
+    // Eigen::MatrixXf tmp_dirs = (Eigen::MatrixXf(2*N,3));
+    
+    // double a = 4*M_PI/N;
+    // double d = sqrt(a);
+    // int M_theta = (round(M_PI/d));
+    // double d_theta = M_PI/M_theta;
+    // double d_phi = a/d_theta;
+
+    // for (int m = 0; m < M_theta; ++m)
+    // {
+    //     double theta = M_PI*(m+0.5)/M_theta;
+    //     int M_phi = int(round(2*M_PI*sin(theta)/d_phi));
+    //     for (int n = 0; n < M_phi; ++n)
+    //     {
+    //         double phi = 2*M_PI*n/M_PI;
+    //         tmp_dirs(N_count,0) = sin(theta)*cos(phi);
+    //         tmp_dirs(N_count,1) = sin(theta)*sin(phi);
+    //         tmp_dirs(N_count,2) = cos(theta);
+    //         N_count++;
+    //     }
+    // }
+    // std::cout << "FINISHED MAKING POINTS" << tmp_dirs << std::endl;
+    _N = 66;
+    // _dirs = Eigen::MatrixXf(_N,3);
+    // 66 uniform points from meshlab
+    _dirs = (Eigen::MatrixXf(_N,3) << -0.000000, -0.000000, -1.000000,
+                                    -0.000000, -0.382683, -0.923880,
+                                    -0.382683, 0.000000, -0.923880,
+                                    0.382683, 0.000000, -0.923880,
+                                    0.000000, 0.382683, -0.923880,
+                                    -0.408248, -0.408248, -0.816497,
+                                    0.408248, -0.408248, -0.816497,
+                                    -0.408248, 0.408248, -0.816497,
+                                    0.408248, 0.408248, -0.816497,
+                                    -0.000000, -0.707107, -0.707107,
+                                    -0.707107, 0.000000, -0.707107,
+                                    0.707107, 0.000000, -0.707107,
+                                    0.000000, 0.707107, -0.707107,
+                                    -0.408248, -0.816497, -0.408248,
+                                    0.408248, -0.816497, -0.408248,
+                                    -0.816497, -0.408248, -0.408248,
+                                    0.816497, -0.408248, -0.408248,
+                                    -0.816497, 0.408248, -0.408248,
+                                    0.816497, 0.408248, -0.408248,
+                                    -0.408248, 0.816497, -0.408248,
+                                    0.408248, 0.816497, -0.408248,
+                                    -0.000000, -0.923880, -0.382683,
+                                    -0.923880, -0.000000, -0.382683,
+                                    0.923880, -0.000000, -0.382683,
+                                    0.000000, 0.923880, -0.382683,
+                                    -0.000000, -1.000000, 0.000000,
+                                    -0.382683, -0.923880, -0.000000,
+                                    0.382683, -0.923880, -0.000000,
+                                    -0.707107, -0.707107, 0.000000,
+                                    0.707107, -0.707107, 0.000000,
+                                    -0.923880, -0.382683, -0.000000,
+                                    0.923880, -0.382683, -0.000000,
+                                    -1.000000, 0.000000, 0.000000,
+                                    1.000000, 0.000000, 0.000000,
+                                    -0.923880, 0.382683, -0.000000,
+                                    0.923880, 0.382683, -0.000000,
+                                    -0.707107, 0.707107, 0.000000,
+                                    0.707107, 0.707107, 0.000000,
+                                    -0.382683, 0.923880, -0.000000,
+                                    0.382683, 0.923880, -0.000000,
+                                    0.000000, 1.000000, 0.000000,
+                                    0.000000, -0.923880, 0.382683,
+                                    -0.923880, -0.000000, 0.382683,
+                                    0.923880, -0.000000, 0.382683,
+                                    -0.000000, 0.923880, 0.382683,
+                                    -0.408248, -0.816497, 0.408248,
+                                    0.408248, -0.816497, 0.408248,
+                                    -0.816497, -0.408248, 0.408248,
+                                    0.816497, -0.408248, 0.408248,
+                                    -0.816497, 0.408248, 0.408248,
+                                    0.816497, 0.408248, 0.408248,
+                                    -0.408248, 0.816497, 0.408248,
+                                    0.408248, 0.816497, 0.408248,
+                                    -0.000000, -0.707107, 0.707107,
+                                    -0.707107, 0.000000, 0.707107,
+                                    0.707107, 0.000000, 0.707107,
+                                    0.000000, 0.707107, 0.707107,
+                                    -0.408248, -0.408248, 0.816497,
+                                    0.408248, -0.408248, 0.816497,
+                                    -0.408248, 0.408248, 0.816497,
+                                    0.408248, 0.408248, 0.816497,
+                                    0.000000, -0.382683, 0.923880,
+                                    -0.382683, -0.000000, 0.923880,
+                                    0.382683, -0.000000, 0.923880,
+                                    -0.000000, 0.382683, 0.923880,
+                                    0.000000, 0.000000, 1.000000).finished();
+
+    // << 1, 1, 1,
+    //                                   1, 1, 0,
+    //                                   1, 1,-1,
+    //                                   1, 0, 1,
+    //                                   1, 0, 0,
+    //                                   1, 0,-1,
+    //                                   1,-1, 1,
+    //                                   1,-1, 0,
+    //                                   1,-1,-1,
+    //                                   0, 1, 1,
+    //                                   0, 1, 0,
+    //                                   0, 1,-1,
+    //                                   0, 0, 1,
+    //                                   0, 0,-1,
+    //                                   0,-1, 1,
+    //                                   0,-1, 0,
+    //                                   0,-1,-1,
+    //                                  -1, 1, 1,
+    //                                  -1, 1, 0,
+    //                                  -1, 1,-1,
+    //                                  -1, 0, 1,
+    //                                  -1, 0, 0,
+    //                                  -1, 0,-1,
+    //                                  -1,-1, 1,
+    //                                  -1,-1, 0,
+    //                                  -1,-1,-1).finished();
 
     // std::cout << _dirs << std::endl;
-    for (int i = 0; i < 26; ++i)
+
+
+    // for (int i = 0; i < N_count; ++i)
+    // {
+    //     std::cout << tmp_dirs.row(i) << std::endl;
+    //     _dirs.row(i) = tmp_dirs.row(i)/(tmp_dirs.row(i).norm());
+    // }
+    // _N = N_count;
+
+    for (int i = 0; i < _N; ++i)
     {
-        // std::cout << _dirs.row(i) << std::endl;
-        _dirs.row(i) = _dirs.row(i)/(_dirs.row(i).norm());
+        _laser_state.push_back(10.0);
     }
-
-
 
     _g2_pub    = nh.advertise<gazebo_msgs::LinkState>("/gazebo/set_link_state", 100);
     _laser_pub = nh.advertise<sensor_msgs::PointCloud2>("/dji_sim/laser/pointcloud", 100);
@@ -195,7 +293,7 @@ void G2Control::publish_state(const sensor_msgs::LaserScan &msg)
     // std::cout << roll << " "<< roll_bin << " " << _prev_roll << std::endl;
 
     sensor_msgs::PointCloud pc_msg;
-    _projector.transformLaserScanToPointCloud("/base_link",msg,pc_msg,_listener,5.0);
+    _projector.transformLaserScanToPointCloud("/base_link",msg,pc_msg,_listener,10.0);
 
     sensor_msgs::PointCloud2 pc2_msg;
     sensor_msgs::convertPointCloudToPointCloud2(pc_msg, pc2_msg);
@@ -221,9 +319,10 @@ void G2Control::publish_state(const sensor_msgs::LaserScan &msg)
         float max_value = (_dirs*p).maxCoeff(&maxIndex);
 
         if((prev_index!=int(maxIndex))){
-            _laser_state[maxIndex] = -10.0;
+            _laser_state[maxIndex] = 10.0;
         }
         int int_dist = floor(distance);
+
         if(int_dist < _laser_state[maxIndex] || (_laser_state[maxIndex] < 0)){
             _laser_state[maxIndex] = int_dist;
         }
@@ -248,7 +347,7 @@ void G2Control::publish_state(const sensor_msgs::LaserScan &msg)
     pcl::PointCloud<pcl::PointXYZ> state_cloud;
     pcl::PointXYZ state_point;
         
-    for (int i = 0; i < 26; ++i)
+    for (int i = 0; i < _N; ++i)
     {
         // std::cout << _laser_state[i] << ", ";
         state_msg.data.push_back(_laser_state[i]);
