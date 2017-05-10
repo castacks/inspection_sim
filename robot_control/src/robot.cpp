@@ -24,39 +24,60 @@ double compute_median(std::vector<double> in)
 }
 RobotControl::RobotControl(ros::NodeHandle &nh)
 {
-    nh.param("mass",        _mass,          1.0);
-    nh.param("inertia",     _inertia,       1.0);
-    nh.param("freq",        _freq,          100.0);
-    nh.param("max_force",   _MAX_FORCE,     1.0);
-    nh.param("max_torque",  _MAX_TORQUE,    1.0);
-    nh.param("pos_p",       _pos_p,         1.0);
-    nh.param("pos_i",       _pos_i,         0.001);
-    nh.param("pos_d",       _pos_d,         3.0);
-    nh.param("ori_p",       _ori_p,         1.0);
-    nh.param("ori_i",       _ori_i,         0.0);
-    nh.param("ori_d",       _ori_d,         1.0);
-    nh.param("gravity",     _gravity,       9.8);
+    _nh_ptr.reset(&nh);
 
-    nh.param("max_linear_vel",  _MAX_LINEAR_VEL,  0.5);
-    nh.param("max_angular_vel", _MAX_ANGULAR_VEL, 0.3);
+    _nh_ptr->param("mass",        _mass,          1.0);
+    _nh_ptr->param("inertia",     _inertia,       1.0);
+    _nh_ptr->param("freq",        _freq,          100.0);
+    _nh_ptr->param("max_force",   _MAX_FORCE,     1.0);
+    _nh_ptr->param("max_torque",  _MAX_TORQUE,    1.0);
+    _nh_ptr->param("pos_p",       _pos_p,         1.0);
+    _nh_ptr->param("pos_i",       _pos_i,         0.001);
+    _nh_ptr->param("pos_d",       _pos_d,         3.0);
+    _nh_ptr->param("ori_p",       _ori_p,         1.0);
+    _nh_ptr->param("ori_i",       _ori_i,         0.0);
+    _nh_ptr->param("ori_d",       _ori_d,         1.0);
+    _nh_ptr->param("gravity",     _gravity,       9.8);
+
+    _nh_ptr->param("max_linear_vel",  _MAX_LINEAR_VEL,  0.5);
+    _nh_ptr->param("max_angular_vel", _MAX_ANGULAR_VEL, 0.3);
 
     double acc_sgm_x, acc_sgm_y, acc_sgm_z;
     double gyr_sgm_x, gyr_sgm_y, gyr_sgm_z;
-    nh.param("acc_sigma_x", acc_sgm_x,      0.01);
-    nh.param("acc_sigma_y", acc_sgm_y,      0.01);
-    nh.param("acc_sigma_z", acc_sgm_z,      0.01);
-    nh.param("gyr_sigma_x", gyr_sgm_x,      0.001);
-    nh.param("gyr_sigma_y", gyr_sgm_y,      0.001);
-    nh.param("gyr_sigma_z", gyr_sgm_z,      0.001);
+    _nh_ptr->param("acc_sigma_x", acc_sgm_x,      0.01);
+    _nh_ptr->param("acc_sigma_y", acc_sgm_y,      0.01);
+    _nh_ptr->param("acc_sigma_z", acc_sgm_z,      0.01);
+    _nh_ptr->param("gyr_sigma_x", gyr_sgm_x,      0.001);
+    _nh_ptr->param("gyr_sigma_y", gyr_sgm_y,      0.001);
+    _nh_ptr->param("gyr_sigma_z", gyr_sgm_z,      0.001);
 
     double acc_bias_sgm_x, acc_bias_sgm_y, acc_bias_sgm_z;
     double gyr_bias_sgm_x, gyr_bias_sgm_y, gyr_bias_sgm_z;
-    nh.param("acc_bias_sigma_x", acc_bias_sgm_x,      0.00001);
-    nh.param("acc_bias_sigma_y", acc_bias_sgm_y,      0.00001);
-    nh.param("acc_bias_sigma_z", acc_bias_sgm_z,      0.00001);
-    nh.param("gyr_bias_sigma_x", gyr_bias_sgm_x,      0.00001);
-    nh.param("gyr_bias_sigma_y", gyr_bias_sgm_y,      0.00001);
-    nh.param("gyr_bias_sigma_z", gyr_bias_sgm_z,      0.00001);
+    _nh_ptr->param("acc_bias_sigma_x", acc_bias_sgm_x,      0.00001);
+    _nh_ptr->param("acc_bias_sigma_y", acc_bias_sgm_y,      0.00001);
+    _nh_ptr->param("acc_bias_sigma_z", acc_bias_sgm_z,      0.00001);
+    _nh_ptr->param("gyr_bias_sigma_x", gyr_bias_sgm_x,      0.00001);
+    _nh_ptr->param("gyr_bias_sigma_y", gyr_bias_sgm_y,      0.00001);
+    _nh_ptr->param("gyr_bias_sigma_z", gyr_bias_sgm_z,      0.00001);
+
+    _nh_ptr->param("err_q_length", _err_q_length, 100);
+
+    _err_q_counter = 0;
+    for (int i = 0; i < _err_q_length; ++i)
+    {
+        _delta_x_errs.push_back(0.0);
+        _delta_x_errs_post.push_back(0.0);
+        _delta_y_errs.push_back(0.0);
+        _delta_y_errs_post.push_back(0.0);
+        _delta_z_errs.push_back(0.0);
+        _delta_z_errs_post.push_back(0.0); 
+    }
+    _mean_err_x = 0;
+    _mean_err_y = 0;
+    _mean_err_z = 0;
+    _var_err_x = 0;
+    _var_err_y = 0;
+    _var_err_z = 0;
 
     _acc_sgm.setValue(acc_sgm_x, acc_sgm_y, acc_sgm_z);
     _gyr_sgm.setValue(gyr_sgm_x, gyr_sgm_y, gyr_sgm_z);
@@ -90,7 +111,8 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
 
     _model_sub = nh.subscribe("/gazebo/model_states", 100, &RobotControl::pose_callback, this);
     _target_sub = nh.subscribe("/dji_sim/target_pose", 100, &RobotControl::target_callback, this);
-
+    _reset_sub = nh.subscribe("/dji_sim/reset", 100, &RobotControl::reset, this);
+    
     _model_pub = nh.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 100);
     _imu_pub   = nh.advertise<sensor_msgs::Imu>("/dji_sim/imu", 100);
     _bias_pub  = nh.advertise<geometry_msgs::TwistStamped>("/dji_sim/bias", 100);
@@ -99,6 +121,124 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
     _force_pub = nh.advertise<geometry_msgs::Point>("/dji_sim/control/force", 100);
     _torque_pub= nh.advertise<geometry_msgs::Point>("/dji_sim/control/torque", 100);
     _err_pub= nh.advertise<geometry_msgs::Point>("/dji_sim/position_err", 100);
+    _cov_pub = nh.advertise<nav_msgs::Odometry>("/dji_sim/error_odom", 100);
+
+
+
+    _acc_noise.setZero();
+    _gyr_noise.setZero();
+    _acc_bias_noise.setZero();
+    _gyr_bias_noise.setZero();
+
+    _rot_gazebo_to_dji.setIdentity();
+    _rot_dji_to_base.setRPY(M_PI, 0.0, 0.0);
+    _rot_world_to_base.setIdentity();
+    _rot_gazebo_to_base.setIdentity();
+    _rot_world_to_gazebo.setRPY(M_PI, 0.0, 0.0);
+
+    _pos_err_d_vec_x.empty();
+    _pos_err_d_vec_y.empty();
+    _pos_err_d_vec_z.empty();
+
+    _ori_err_d_vec_x.empty();
+    _ori_err_d_vec_y.empty();
+    _ori_err_d_vec_z.empty();
+    _err_count = 0;
+}
+
+void RobotControl::reset(const geometry_msgs::Pose &msg)
+{
+    _nh_ptr->param("mass",        _mass,          1.0);
+    _nh_ptr->param("inertia",     _inertia,       1.0);
+    _nh_ptr->param("freq",        _freq,          100.0);
+    _nh_ptr->param("max_force",   _MAX_FORCE,     1.0);
+    _nh_ptr->param("max_torque",  _MAX_TORQUE,    1.0);
+    _nh_ptr->param("pos_p",       _pos_p,         1.0);
+    _nh_ptr->param("pos_i",       _pos_i,         0.001);
+    _nh_ptr->param("pos_d",       _pos_d,         3.0);
+    _nh_ptr->param("ori_p",       _ori_p,         1.0);
+    _nh_ptr->param("ori_i",       _ori_i,         0.0);
+    _nh_ptr->param("ori_d",       _ori_d,         1.0);
+    _nh_ptr->param("gravity",     _gravity,       9.8);
+
+    _nh_ptr->param("max_linear_vel",  _MAX_LINEAR_VEL,  0.5);
+    _nh_ptr->param("max_angular_vel", _MAX_ANGULAR_VEL, 0.3);
+
+    double acc_sgm_x, acc_sgm_y, acc_sgm_z;
+    double gyr_sgm_x, gyr_sgm_y, gyr_sgm_z;
+    _nh_ptr->param("acc_sigma_x", acc_sgm_x,      0.01);
+    _nh_ptr->param("acc_sigma_y", acc_sgm_y,      0.01);
+    _nh_ptr->param("acc_sigma_z", acc_sgm_z,      0.01);
+    _nh_ptr->param("gyr_sigma_x", gyr_sgm_x,      0.001);
+    _nh_ptr->param("gyr_sigma_y", gyr_sgm_y,      0.001);
+    _nh_ptr->param("gyr_sigma_z", gyr_sgm_z,      0.001);
+
+    double acc_bias_sgm_x, acc_bias_sgm_y, acc_bias_sgm_z;
+    double gyr_bias_sgm_x, gyr_bias_sgm_y, gyr_bias_sgm_z;
+    _nh_ptr->param("acc_bias_sigma_x", acc_bias_sgm_x,      0.00001);
+    _nh_ptr->param("acc_bias_sigma_y", acc_bias_sgm_y,      0.00001);
+    _nh_ptr->param("acc_bias_sigma_z", acc_bias_sgm_z,      0.00001);
+    _nh_ptr->param("gyr_bias_sigma_x", gyr_bias_sgm_x,      0.00001);
+    _nh_ptr->param("gyr_bias_sigma_y", gyr_bias_sgm_y,      0.00001);
+    _nh_ptr->param("gyr_bias_sigma_z", gyr_bias_sgm_z,      0.00001);
+
+    _nh_ptr->param("err_q_length", _err_q_length, 100);
+
+    _err_q_counter = 0;
+    for (int i = 0; i < _err_q_length; ++i)
+    {
+        _delta_x_errs[i] = 0.0;
+        _delta_x_errs_post[i] = 0.0;
+        _delta_y_errs[i] = 0.0;
+        _delta_y_errs_post[i] = 0.0;
+        _delta_z_errs[i] = 0.0;
+        _delta_z_errs_post[i] = 0.0; 
+    }
+    _mean_err_x = 0;
+    _mean_err_y = 0;
+    _mean_err_z = 0;
+    _var_err_x = 0;
+    _var_err_y = 0;
+    _var_err_z = 0;
+
+    _acc_sgm.setValue(acc_sgm_x, acc_sgm_y, acc_sgm_z);
+    _gyr_sgm.setValue(gyr_sgm_x, gyr_sgm_y, gyr_sgm_z);
+
+    _acc_bias_sgm.setValue(acc_bias_sgm_x, acc_bias_sgm_y, acc_bias_sgm_z);
+    _gyr_bias_sgm.setValue(gyr_bias_sgm_x, gyr_bias_sgm_y, gyr_bias_sgm_z);
+
+    _acc_bias.setZero();
+    _gyr_bias.setZero();
+
+    _init_time = true;
+    _init_ctrl = true;
+    _init_target = true;
+    _init_pose = true;
+    std::cout << "RESETTING" << std::endl;
+    std::cout << msg.position << std::endl;
+    _target_position.setValue(msg.position.x,msg.position.y,msg.position.z);
+    _target_orientation.setZero();
+    _target_orientation_prev.setZero();
+
+    _target_round = 0.0;
+    _pose_round = 0.0;
+
+    _position.setValue(msg.position.x,msg.position.y,msg.position.z);
+    _est_position.setValue(msg.position.x,msg.position.y,msg.position.z);
+
+    _est_orientation.setZero();
+
+    _linear_acceleration.setZero();
+    _angular_acceleration.setZero();
+
+    _linear_velocity.setZero();
+    _angular_velocity.setZero();
+
+    _pos_err_i.setZero();
+    _ori_err_i.setZero();
+
+    _force.setZero();
+    _torque.setZero();
 
     _acc_noise.setZero();
     _gyr_noise.setZero();
@@ -181,6 +321,7 @@ void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
 
             update_time();
             update_control();
+            update_control_variance();
             publish_control();
             update_state();
             publish_state();
@@ -195,6 +336,27 @@ void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
     }
 
 }
+
+void RobotControl::localization_callback(const nav_msgs::Odometry &msg)
+{
+    _est_position[0] = msg.pose.pose.position.x;
+    _est_position[1] = msg.pose.pose.position.y;
+    _est_position[2] = msg.pose.pose.position.z;
+    
+    tf::Matrix3x3 offset_matrix;
+    offset_matrix.setRPY(3.1415,0,0);
+    _est_position = offset_matrix*_est_position;
+
+    tf::Quaternion q;
+    tf::quaternionMsgToTF(msg.pose.pose.orientation, q);
+    tf::Matrix3x3 orientation_matrix = tf::Matrix3x3(q);
+    orientation_matrix.getRPY(_est_orientation[0],_est_orientation[1],_est_orientation[2]);
+
+    update_control();
+    update_control_variance();
+    publish_control();
+}
+
 void RobotControl::update_time()
 {
     _time = ros::Time::now().toSec();
@@ -217,7 +379,7 @@ void RobotControl::update_time()
 void RobotControl::update_control()
 {
     // error
-    _pos_err = _target_position    - _position;
+    _pos_err = _target_position    - _est_position;
     _ori_err = _target_orientation - _orientation;
 
     // derivative of error
@@ -262,9 +424,9 @@ void RobotControl::update_control()
     }
 
     geometry_msgs::Point err_msg;
-    err_msg.x = _pos_err_d.x();
-    err_msg.y = _pos_err_d.y();
-    err_msg.z = _pos_err_d.z();
+    err_msg.x = _pos_err.x();
+    err_msg.y = _pos_err.y();
+    err_msg.z = _pos_err.z();
     _err_pub.publish(err_msg);
 //    ROS_INFO("robot_control: dt = %0.3f", _dt);
 
@@ -290,6 +452,53 @@ void RobotControl::update_control()
     if(fabs(_torque[1]) > _MAX_TORQUE) _torque[1] = sgn(_torque[1]) * _MAX_TORQUE;
     if(fabs(_torque[2]) > _MAX_TORQUE) _torque[2] = sgn(_torque[2]) * _MAX_TORQUE;
 
+}
+
+
+void RobotControl::update_control_variance()
+{
+    // remove oldest value from variance
+    _var_err_x -= _delta_x_errs[_err_q_counter]*(_delta_x_errs_post[_err_q_counter]);
+    _var_err_y -= _delta_y_errs[_err_q_counter]*(_delta_y_errs_post[_err_q_counter]);
+    _var_err_z -= _delta_z_errs[_err_q_counter]*(_delta_z_errs_post[_err_q_counter]);
+
+    // remove oldest value from mean
+    _mean_err_x -= _delta_x_errs[_err_q_counter]/_err_q_length;
+    _mean_err_y -= _delta_y_errs[_err_q_counter]/_err_q_length;
+    _mean_err_z -= _delta_z_errs[_err_q_counter]/_err_q_length;
+
+    // update differences
+    _delta_x_errs[_err_q_counter] = (fabs(_pos_err[0]) - _mean_err_x);
+    _delta_y_errs[_err_q_counter] = (fabs(_pos_err[1]) - _mean_err_y);
+    _delta_z_errs[_err_q_counter] = (fabs(_pos_err[2]) - _mean_err_z);
+
+    // update mean
+    _mean_err_x += _delta_x_errs[_err_q_counter]/_err_q_length;
+    _mean_err_y += _delta_y_errs[_err_q_counter]/_err_q_length;
+    _mean_err_z += _delta_z_errs[_err_q_counter]/_err_q_length;
+
+    // update post differences
+    _delta_x_errs_post[_err_q_counter] = (fabs(_pos_err[0]) - _mean_err_x);
+    _delta_y_errs_post[_err_q_counter] = (fabs(_pos_err[1]) - _mean_err_y);
+    _delta_z_errs_post[_err_q_counter] = (fabs(_pos_err[2]) - _mean_err_z);
+
+    // update variance (actually var*(n-1))
+    _var_err_x += _delta_x_errs[_err_q_counter]*(_delta_x_errs_post[_err_q_counter]);
+    _var_err_y += _delta_y_errs[_err_q_counter]*(_delta_y_errs_post[_err_q_counter]);
+    _var_err_z += _delta_z_errs[_err_q_counter]*(_delta_z_errs_post[_err_q_counter]);
+
+    // update queue counter
+    _err_q_counter++;
+    _err_q_counter = _err_q_counter%_err_q_length;
+
+    nav_msgs::Odometry cov_msg;
+    cov_msg.pose.covariance[0] = _var_err_x/(_err_q_length-1);
+    cov_msg.pose.covariance[7] = _var_err_y/(_err_q_length-1);
+    cov_msg.pose.covariance[14]= _var_err_z/(_err_q_length-1);
+    cov_msg.pose.pose.position.x = _mean_err_x;
+    cov_msg.pose.pose.position.y = _mean_err_y;
+    cov_msg.pose.pose.position.z = _mean_err_z;
+    _cov_pub.publish(cov_msg);
 }
 
 void RobotControl::update_state()
@@ -361,7 +570,7 @@ void RobotControl::publish_imu()
 
     sensor_msgs::Imu msg;
 
-    msg.header.frame_id = "base_link";
+    msg.header.frame_id = "base_link_est";
     msg.header.stamp = ros::Time::now();
 
     msg.angular_velocity.x = imu_gyroscope.x() + _gyr_noise.x();

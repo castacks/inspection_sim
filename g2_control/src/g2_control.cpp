@@ -30,7 +30,7 @@ void G2Control::publish_g2_angle(const ros::TimerEvent& event) {
     _init = false;
 
     if(fabs(_time_delta) > 0.02 || fabs(_time_delta) < 0.005 ) {
-        ROS_WARN("g2_control: delta_t = %0.4f", _time_delta);
+      //   ROS_WARN("g2_control: delta_t = %0.4f", _time_delta);
         _time_delta = 0.01;
     }
 
@@ -58,7 +58,7 @@ void G2Control::publish_point_cloud(const sensor_msgs::LaserScan &msg) {
         "/base_link",
         msg.header.stamp + ros::Duration().fromSec(msg.ranges.size()*msg.time_increment),
         ros::Duration(0.02))){
-        ROS_WARN("g2_control: lose transform from %s to base_link", msg.header.frame_id.c_str());
+      //   ROS_WARN("g2_control: lose transform from %s to base_link", msg.header.frame_id.c_str());
         return;
     }
 
@@ -118,5 +118,6 @@ void G2Control::publish_point_cloud(const sensor_msgs::LaserScan &msg) {
 
     sensor_msgs::PointCloud2 pc2_msg_out;
     pcl::toROSMsg(pcl_cloud, pc2_msg_out);
+    pc2_msg_out.header.frame_id = "/base_link_est";
     _laser_pub.publish(pc2_msg_out);
 }

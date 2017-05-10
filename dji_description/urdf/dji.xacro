@@ -6,7 +6,7 @@
   <xacro:property name="PI" value="3.1415926535897931"/>
   <xacro:property name="mass" value="30" /> <!-- arbitrary value for mass -->
   <xacro:property name="width" value="1.0" /> <!-- Square dimensions (widthxwidth) of beams -->
-  <xacro:property name="height" value="1.0" /> <!-- DJI height -->
+  <xacro:property name="height" value="0.5" /> <!-- DJI height -->
 
   <!-- Import all Gazebo-customization elements, including Gazebo colors -->
   <xacro:include filename="$(find dji_description)/urdf/dji.gazebo" />
