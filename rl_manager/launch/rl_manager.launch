@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<launch>
+
+        <param name="use_sim_time" value="true" />
+    
+			
+        <node pkg="rl_manager" type="rl_manager_node" name="rl_manager" output="screen">
+		    
+        <param name="map_file_name"            value="$(find rl_manager)/map/bridge.bt"/>
+        <param name="octree_resolution"        value="0.05"/>
+        <param name="max_obstacle_dist"        value="100.0"/>
+
+        <param name="init_roll"                 value="0.0"/>
+        <param name="init_pitch"                value="0.0"/>
+        <param name="init_yaw"                  value="0.0"/>
+        </node>
+	    
+<!--         <node pkg="octomap_server" type="octomap_server_node" name="octomap_server_eskf" 
+                args="$(find lidar_eskf)/map/bridge.bt">
+              <param name="frame_id"           value="world"/>
+              <param name="base_frame_id"      value="world_view"/>
+        </node>	 -->
+</launch>
