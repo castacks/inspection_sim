@@ -133,6 +133,7 @@ void RobotControl::reset(const geometry_msgs::Pose &msg)
     std::cout << "RESETTING" << std::endl;
     std::cout << msg.position << std::endl;
     _target_position.setValue(msg.position.x,msg.position.y,msg.position.z);
+    _target_accel.setZero();
     _target_orientation.setZero();
     _target_orientation_prev.setZero();
 

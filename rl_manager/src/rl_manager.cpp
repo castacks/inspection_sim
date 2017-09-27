@@ -32,7 +32,7 @@ RL_manager::RL_manager()
     _done_pub = nh.advertise<std_msgs::Bool>("/dji_sim/collision", 100);
     _reset_pub = nh.advertise<geometry_msgs::Pose>("/dji_sim/reset", 100);
     _marker_pub = nh.advertise<visualization_msgs::Marker>("visualization_marker", 10);
-    // _odom_sub = nh.subscribe("/lidar_eskf/odom", 1, &RL_manager::odom_callback, this);
+    // _odom_sub = nh.subscribe("/dji_sim/odometry", 1, &RL_manager::odom_callback, this);
     
     // _target_sub = nh.subscribe("/target_dir", 1, &RL_manager::target_callback, this);
     _imu_sub = nh.subscribe("/dji_sim/imu", 1, &RL_manager::imu_callback, this);
@@ -41,7 +41,7 @@ RL_manager::RL_manager()
     _client = nh.serviceClient<gazebo_msgs::SetModelState>("/gazebo/set_model_state");
     ros::ServiceServer reset_service = nh.advertiseService("/dji_sim/reset_service", &RL_manager::reset, this);
     // <std_srvs::Empty::Request, std_srvs::Empty::Response>
-    ros::Rate r(40);
+    ros::Rate r(20);
     while(ros::ok())
     {
         ros::spinOnce();
@@ -60,7 +60,7 @@ RL_manager::RL_manager()
         // std::cout << "Current TRANSFORM: " << v.x() << " " << v.y() << " " << v.z() << " " << _x << " " << _y << " " << _z<<  std::endl;
         bool collision = check_occupancy(v.x(),-v.y(),-v.z(),_radius,false);
 
-        if(collision){
+        if(collision || v.x() > 2*_x_max || v.x() < 2*_x_min || v.y() > 2*_y_max || v.y() < 2*_y_min){
             // std_srvs::Empty::Request request;
             // std_srvs::Empty::Response response;
             // reset(request, response);
@@ -72,6 +72,13 @@ RL_manager::RL_manager()
 
     }
 }
+
+// void RL_manager::odom_callback(const nav_msgs::Odometry &msg)
+// {
+//     _robot_x = msg.pose.pose.position.x;
+//     _robot_y = msg.pose.pose.position.y; 
+//     _robot_z = msg.pose.pose.position.z; 
+// }
 
 // takes in points in world cords
 bool RL_manager::check_occupancy(float x, float y, float z, float radius, bool use_cov)
@@ -149,17 +156,17 @@ void RL_manager::generate_random_pose()
         // _theta = (2*M_PI)*((double) rand() / (RAND_MAX));
         _theta = 0.0;
         // CHECK OCCUPANCY
-        found_good_pose = !check_occupancy(_x,_y,_z,1.5*_radius,false);
+        found_good_pose = !check_occupancy(_x,_y,_z,1.25*_radius,false);
         // found_good_pose = _calc_localizability_ptr->check_neighborhood_occupancy(_x,_y,_z,_radius);
     }
-    _target_x = _x + (2*dis(gen)-1);
-    _target_y = _y + (2*dis(gen));
-    _target_z = _z + (2*dis(gen)-1);
-    double target_distance = sqrt(_target_x*_target_x + _target_y*_target_y + _target_z*_target_z);
-    _target_x = _target_offset*_target_x/target_distance;
-    _target_y = _target_offset*_target_y/target_distance;
-    _target_z = _target_offset*_target_z/target_distance;
-    std::cout << _target_x << " " << _target_y << " " << _target_z << std::endl;
+    _target_x = _x + _target_offset*(2*dis(gen));
+    _target_y = _y + _target_offset*(2*dis(gen)-1);
+    _target_z = _z + _target_offset*(2*dis(gen)-1);
+    // double target_distance = sqrt(_target_x*_target_x + _target_y*_target_y + _target_z*_target_z);
+    // _target_x = _target_x;
+    // _target_y = _target_y;
+    // _target_z = _target_z;
+    // std::cout << _target_x << " " << _target_y << " " << _target_z << std::endl;
     
     // _target_theta = (2*M_PI)*(static_cast <double> (rand()) / static_cast <double> (RAND_MAX));
     _target_theta = 0.0;
@@ -199,7 +206,7 @@ void RL_manager::publish_state(const sensor_msgs::LaserScan &msg)
         "/base_link",
         msg.header.stamp + ros::Duration().fromSec(msg.ranges.size()*msg.time_increment),
         ros::Duration(0.03))){
-        ROS_WARN("g2_control: lose transform from %s to base_link in rl_manager", msg.header.frame_id.c_str());
+        ROS_WARN("rl_manager: lose transform from %s to base_link in rl_manager", msg.header.frame_id.c_str());
         return;
     }
 
@@ -235,7 +242,7 @@ void RL_manager::publish_state(const sensor_msgs::LaserScan &msg)
     // std::cout << num_scans << std::endl;
     // std::cout << roll_bin << std::endl;
     int index = 0;
-    for(int i=0; i < num_scans; i+=2)
+    for(int i=0; i < num_scans; i+=8)
     {
         index = i;
         if(roll_bin>16){
@@ -249,19 +256,33 @@ void RL_manager::publish_state(const sensor_msgs::LaserScan &msg)
             int pixel_value = int(255*(msg.ranges[index])/10.0);
             // std::cout << pixel_value << " " << msg.ranges[index] << std::endl;
             // std::cout << _range_image.at<uchar>(0,0) << std::endl;
-            _range_image.at<uchar>(roll_bin % 16,i/2) = pixel_value;            
+            _range_image.at<uchar>(roll_bin % 16,i/8) = pixel_value;            
         }else{
             // std::cout << "NAN OR INF" << std::endl;
             // std::cout << _range_image.at<uchar>(roll_bin,i) << std::endl;
-            _range_image.at<uchar>(roll_bin % 16,i/2) = 255;            
+            _range_image.at<uchar>(roll_bin % 16,i/8) = 255;            
         }
         
+    }
+    tf::Transform target_transform;
+    target_transform.setOrigin(tf::Vector3(_target_x,_target_y,_target_z));
+    tf::Quaternion q2(0,0,0,1);
+    target_transform.setRotation(q2);
+    _br.sendTransform(tf::StampedTransform(target_transform,ros::Time::now(),"world","target"));
+
+    if((roll_bin % 16) !=0){
+        return;
+    }
+
+    _init_counter++;
+
+    if(_init_counter < 5){
+        return;
     }
 
     sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", _range_image).toImageMsg();
 
     _image_pub.publish(img_msg);
-    
 
 }
 
@@ -347,15 +368,19 @@ void RL_manager::init_variables()
 
     // _y_min = -15;
     // _y_max = 15;
-    _x_min = -5;
-    _x_max = 5;
+    _x_min = -10;
+    _x_max = 10;
 
-    _y_min = -5;
-    _y_max = 5;
+    _y_min = -9;
+    _y_max = 9;
     
-    _z_min = -5;
-    _z_max = -2.25;
+    _z_min = -12;
+    _z_max = -1.25;
     
+    // _robot_x = 0;
+    // _robot_y = 0;
+    // _robot_z = -1.5;
+
     _init = true;
     _tf_publishing = false;
     _prev_roll = 0;
@@ -367,10 +392,11 @@ void RL_manager::init_variables()
     _target_localizability = 0;
     _radius = 1.0;
     _imu_ready = false;
-    _target_offset = 5.0;
+    _target_offset = 3.0;
 
     _rows = 16;
-    _cols = 360;
+    _cols = 90;
+    _init_counter = 0;
     // range_image = sensor_msgs::Image();
     // range_image.height = _rows;
     // range_image.width = _cols;

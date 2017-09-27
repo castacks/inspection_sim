@@ -42,7 +42,7 @@ public:
 	void publish_state(const sensor_msgs::LaserScan &msg);
     void imu_callback(const sensor_msgs::Imu &msg);
     void target_callback(const geometry_msgs::Vector3 &msg);
-    // void odom_callback(const nav_msgs::Odometry &msg);
+    void odom_callback(const nav_msgs::Odometry &msg);
     void generate_random_pose();
     bool reset(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response);
     void init_variables();
@@ -88,7 +88,8 @@ public:
     image_transport::Publisher _image_pub;
     cv::Mat _range_image;
     
-
+    double _robot_x, _robot_y, _robot_z;
+    int _init_counter;
 };
 
 

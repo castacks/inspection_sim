@@ -118,6 +118,6 @@ void G2Control::publish_point_cloud(const sensor_msgs::LaserScan &msg) {
 
     sensor_msgs::PointCloud2 pc2_msg_out;
     pcl::toROSMsg(pcl_cloud, pc2_msg_out);
-    pc2_msg_out.header.frame_id = "/base_link_est";
+    pc2_msg_out.header.frame_id = "/base_link";
     _laser_pub.publish(pc2_msg_out);
 }
