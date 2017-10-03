@@ -213,20 +213,9 @@ void RL_manager::publish_state(const sensor_msgs::LaserScan &msg)
     tf::StampedTransform transform;
     _listener.lookupTransform(msg.header.frame_id, "/base_link",  
                              ros::Time(0), transform);
-    tf::Quaternion q = transform.getRotation();
-    tf::Matrix3x3 m(q);
-    double roll,pitch,yaw;
-    m.getRPY(roll,pitch,yaw);
-    int roll_bin = ceil(32*((roll + M_PI)/(2*M_PI)-1/64));
-    // roll_bin = roll_bin % 16;
-
-    // std::cout << roll << " "<< roll_bin << " " << _prev_roll << std::endl;
-    
-
 
     sensor_msgs::PointCloud pc_msg;
     _projector.transformLaserScanToPointCloud("/base_link",msg,pc_msg,_listener,10.0);
-
 
     geometry_msgs::PointStamped Point_msg;
     Point_msg.point.x = _target_x;
@@ -238,47 +227,52 @@ void RL_manager::publish_state(const sensor_msgs::LaserScan &msg)
     _target_dir[1] = Point_msg.point.y;
     _target_dir[2] = Point_msg.point.z;
     
-    int num_scans = ((msg.angle_max - msg.angle_min)/msg.angle_increment) +1;
-    // std::cout << num_scans << std::endl;
-    // std::cout << roll_bin << std::endl;
-    int index = 0;
-    for(int i=0; i < num_scans; i+=8)
+    int num_rays = ((msg.angle_max - msg.angle_min)/msg.angle_increment) +1;
+    int index = num_rays*num_rays-1;
+    // ROS_INFO(num_rays);
+    // ROS_INFO(index);
+    for(int i = 0; i < num_rays; i++)
     {
-        index = i;
-        if(roll_bin>16){
-            index = num_scans-i-1;
-        }else{
-            index = i;
-        }
-        // std::cout << msg.ranges[i] << std::endl;
-        if((!isnan(msg.ranges[index])) && (!isinf(msg.ranges[index]) && (msg.ranges[index]<10.0) )){
+        for(int j = 0; j < num_rays; j++)
+        {
+            int pixel_value = int(255*(msg.ranges[index])/20.0);
 
-            int pixel_value = int(255*(msg.ranges[index])/10.0);
-            // std::cout << pixel_value << " " << msg.ranges[index] << std::endl;
-            // std::cout << _range_image.at<uchar>(0,0) << std::endl;
-            _range_image.at<uchar>(roll_bin % 16,i/8) = pixel_value;            
-        }else{
-            // std::cout << "NAN OR INF" << std::endl;
-            // std::cout << _range_image.at<uchar>(roll_bin,i) << std::endl;
-            _range_image.at<uchar>(roll_bin % 16,i/8) = 255;            
+            if((!isnan(msg.ranges[index])) && (!isinf(msg.ranges[index]) && (msg.ranges[index]<20.0) ))
+            {
+                _range_image.at<uchar>(i,j) = pixel_value;
+            }else{
+                _range_image.at<uchar>(i,j) = 255;
+            }
+            index--;
         }
-        
     }
+
+    // {
+    //     index = i;
+    //     if(roll_bin>16){
+    //         index = num_scans-i-1;
+    //     }else{
+    //         index = i;
+    //     }
+    //     // std::cout << msg.ranges[i] << std::endl;
+    //     if((!isnan(msg.ranges[index])) && (!isinf(msg.ranges[index]) && (msg.ranges[index]<10.0) )){
+
+    //         int pixel_value = int(255*(msg.ranges[index])/10.0);
+    //         // std::cout << pixel_value << " " << msg.ranges[index] << std::endl;
+    //         // std::cout << _range_image.at<uchar>(0,0) << std::endl;
+    //         _range_image.at<uchar>(roll_bin % 16,i/8) = pixel_value;            
+    //     }else{
+    //         // std::cout << "NAN OR INF" << std::endl;
+    //         // std::cout << _range_image.at<uchar>(roll_bin,i) << std::endl;
+    //         _range_image.at<uchar>(roll_bin % 16,i/8) = 255;            
+    //     }
+        
+    // }
     tf::Transform target_transform;
     target_transform.setOrigin(tf::Vector3(_target_x,_target_y,_target_z));
     tf::Quaternion q2(0,0,0,1);
     target_transform.setRotation(q2);
     _br.sendTransform(tf::StampedTransform(target_transform,ros::Time::now(),"world","target"));
-
-    if((roll_bin % 16) !=0){
-        return;
-    }
-
-    _init_counter++;
-
-    if(_init_counter < 5){
-        return;
-    }
 
     sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", _range_image).toImageMsg();
 
@@ -394,8 +388,8 @@ void RL_manager::init_variables()
     _imu_ready = false;
     _target_offset = 3.0;
 
-    _rows = 16;
-    _cols = 90;
+    _rows = 20;
+    _cols = 20;
     _init_counter = 0;
     // range_image = sensor_msgs::Image();
     // range_image.height = _rows;
