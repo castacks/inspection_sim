@@ -18,15 +18,18 @@ RL_manager::RL_manager()
     reset_sim_pose();
     geometry_msgs::Pose pose_msg;
     pose_msg.position.x = _x;
-    pose_msg.position.x = _y;
-    pose_msg.position.x = _z;
+    pose_msg.position.y = _y;
+    pose_msg.position.z = _z;
     _reset_pub.publish(pose_msg);
 
-    //
     image_transport::ImageTransport it(nh);
-    _image_pub = it.advertise("range_image",1);
-
-
+    _image_pub_0 = it.advertise("range_image_0",1);
+    _image_pub_1 = it.advertise("range_image_1",1);
+    _image_pub_2 = it.advertise("range_image_2",1);
+    _image_pub_3 = it.advertise("range_image_3",1);
+    _image_pub_4 = it.advertise("range_image_4",1);
+    _image_pub_5 = it.advertise("range_image_5",1);
+    
     _laser_pub = nh.advertise<sensor_msgs::PointCloud2>("/dji_sim/laser_state_cloud", 100);
     _state_pub = nh.advertise<std_msgs::Float64MultiArray>("/dji_sim/laser_state", 100);
     _done_pub = nh.advertise<std_msgs::Bool>("/dji_sim/collision", 100);
@@ -36,8 +39,14 @@ RL_manager::RL_manager()
     
     // _target_sub = nh.subscribe("/target_dir", 1, &RL_manager::target_callback, this);
     _imu_sub = nh.subscribe("/dji_sim/imu", 1, &RL_manager::imu_callback, this);
-    _laser_sub = nh.subscribe("/dji_sim/laser/laserscan", 1, &RL_manager::publish_state, this);
 
+    _laser_sub_0 = nh.subscribe("/dji_sim/laser/laserscan_0", 1, &RL_manager::publish_laser_0, this);
+    _laser_sub_1 = nh.subscribe("/dji_sim/laser/laserscan_1", 1, &RL_manager::publish_laser_1, this);
+    _laser_sub_2 = nh.subscribe("/dji_sim/laser/laserscan_2", 1, &RL_manager::publish_laser_2, this);
+    _laser_sub_3 = nh.subscribe("/dji_sim/laser/laserscan_3", 1, &RL_manager::publish_laser_3, this);
+    _laser_sub_4 = nh.subscribe("/dji_sim/laser/laserscan_4", 1, &RL_manager::publish_laser_4, this);
+    _laser_sub_5 = nh.subscribe("/dji_sim/laser/laserscan_5", 1, &RL_manager::publish_laser_5, this);
+    
     _client = nh.serviceClient<gazebo_msgs::SetModelState>("/gazebo/set_model_state");
     ros::ServiceServer reset_service = nh.advertiseService("/dji_sim/reset_service", &RL_manager::reset, this);
     // <std_srvs::Empty::Request, std_srvs::Empty::Response>
@@ -72,13 +81,6 @@ RL_manager::RL_manager()
 
     }
 }
-
-// void RL_manager::odom_callback(const nav_msgs::Odometry &msg)
-// {
-//     _robot_x = msg.pose.pose.position.x;
-//     _robot_y = msg.pose.pose.position.y; 
-//     _robot_z = msg.pose.pose.position.z; 
-// }
 
 // takes in points in world cords
 bool RL_manager::check_occupancy(float x, float y, float z, float radius, bool use_cov)
@@ -191,9 +193,50 @@ void RL_manager::imu_callback(const sensor_msgs::Imu &msg)
     _imu_ready = true;
 }
 
+void RL_manager::publish_laser_0(const sensor_msgs::LaserScan &msg)
+{
+    publish_state(msg);
+    sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", _range_image).toImageMsg();
+    _image_pub_0.publish(img_msg);
+}
+
+void RL_manager::publish_laser_1(const sensor_msgs::LaserScan &msg)
+{
+    publish_state(msg);
+    sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", _range_image).toImageMsg();
+    _image_pub_1.publish(img_msg);
+}
+
+void RL_manager::publish_laser_2(const sensor_msgs::LaserScan &msg)
+{
+    publish_state(msg);
+    sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", _range_image).toImageMsg();
+    _image_pub_2.publish(img_msg);
+}
+
+void RL_manager::publish_laser_3(const sensor_msgs::LaserScan &msg)
+{
+    publish_state(msg);
+    sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", _range_image).toImageMsg();
+    _image_pub_3.publish(img_msg);
+}
+
+void RL_manager::publish_laser_4(const sensor_msgs::LaserScan &msg)
+{
+    publish_state(msg);
+    sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", _range_image).toImageMsg();
+    _image_pub_4.publish(img_msg);
+}
+
+void RL_manager::publish_laser_5(const sensor_msgs::LaserScan &msg)
+{
+    publish_state(msg);
+    sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", _range_image).toImageMsg();
+    _image_pub_5.publish(img_msg);
+}
+
 void RL_manager::publish_state(const sensor_msgs::LaserScan &msg)
 {
-    // ROS_INFO("INSIDE PUBLISH STATE");
 
     if(!_imu_ready){
         ROS_INFO("WAITING FOR IMU DATA");
@@ -235,9 +278,9 @@ void RL_manager::publish_state(const sensor_msgs::LaserScan &msg)
     {
         for(int j = 0; j < num_rays; j++)
         {
-            int pixel_value = int(255*(msg.ranges[index])/20.0);
+            int pixel_value = int(255*(msg.ranges[index])/10.0);
 
-            if((!isnan(msg.ranges[index])) && (!isinf(msg.ranges[index]) && (msg.ranges[index]<20.0) ))
+            if((!isnan(msg.ranges[index])) && (!isinf(msg.ranges[index]) && (msg.ranges[index]<10.0) ))
             {
                 _range_image.at<uchar>(i,j) = pixel_value;
             }else{
@@ -247,121 +290,20 @@ void RL_manager::publish_state(const sensor_msgs::LaserScan &msg)
         }
     }
 
-    // {
-    //     index = i;
-    //     if(roll_bin>16){
-    //         index = num_scans-i-1;
-    //     }else{
-    //         index = i;
-    //     }
-    //     // std::cout << msg.ranges[i] << std::endl;
-    //     if((!isnan(msg.ranges[index])) && (!isinf(msg.ranges[index]) && (msg.ranges[index]<10.0) )){
-
-    //         int pixel_value = int(255*(msg.ranges[index])/10.0);
-    //         // std::cout << pixel_value << " " << msg.ranges[index] << std::endl;
-    //         // std::cout << _range_image.at<uchar>(0,0) << std::endl;
-    //         _range_image.at<uchar>(roll_bin % 16,i/8) = pixel_value;            
-    //     }else{
-    //         // std::cout << "NAN OR INF" << std::endl;
-    //         // std::cout << _range_image.at<uchar>(roll_bin,i) << std::endl;
-    //         _range_image.at<uchar>(roll_bin % 16,i/8) = 255;            
-    //     }
-        
-    // }
     tf::Transform target_transform;
     target_transform.setOrigin(tf::Vector3(_target_x,_target_y,_target_z));
     tf::Quaternion q2(0,0,0,1);
     target_transform.setRotation(q2);
     _br.sendTransform(tf::StampedTransform(target_transform,ros::Time::now(),"world","target"));
 
-    sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", _range_image).toImageMsg();
 
-    _image_pub.publish(img_msg);
 
 }
 
 void RL_manager::init_variables()
 {
     _done = false;
-    _N = 66;
-    // 66 uniform points from meshlab
-    _dirs = (Eigen::MatrixXf(_N,3) << -0.000000, -0.000000, -1.000000,
-                                    -0.000000, -0.382683, -0.923880,
-                                    -0.382683, 0.000000, -0.923880,
-                                    0.382683, 0.000000, -0.923880,
-                                    0.000000, 0.382683, -0.923880,
-                                    -0.408248, -0.408248, -0.816497,
-                                    0.408248, -0.408248, -0.816497,
-                                    -0.408248, 0.408248, -0.816497,
-                                    0.408248, 0.408248, -0.816497,
-                                    -0.000000, -0.707107, -0.707107,
-                                    -0.707107, 0.000000, -0.707107,
-                                    0.707107, 0.000000, -0.707107,
-                                    0.000000, 0.707107, -0.707107,
-                                    -0.408248, -0.816497, -0.408248,
-                                    0.408248, -0.816497, -0.408248,
-                                    -0.816497, -0.408248, -0.408248,
-                                    0.816497, -0.408248, -0.408248,
-                                    -0.816497, 0.408248, -0.408248,
-                                    0.816497, 0.408248, -0.408248,
-                                    -0.408248, 0.816497, -0.408248,
-                                    0.408248, 0.816497, -0.408248,
-                                    -0.000000, -0.923880, -0.382683,
-                                    -0.923880, -0.000000, -0.382683,
-                                    0.923880, -0.000000, -0.382683,
-                                    0.000000, 0.923880, -0.382683,
-                                    -0.000000, -1.000000, 0.000000,
-                                    -0.382683, -0.923880, -0.000000,
-                                    0.382683, -0.923880, -0.000000,
-                                    -0.707107, -0.707107, 0.000000,
-                                    0.707107, -0.707107, 0.000000,
-                                    -0.923880, -0.382683, -0.000000,
-                                    0.923880, -0.382683, -0.000000,
-                                    -1.000000, 0.000000, 0.000000,
-                                    1.000000, 0.000000, 0.000000,
-                                    -0.923880, 0.382683, -0.000000,
-                                    0.923880, 0.382683, -0.000000,
-                                    -0.707107, 0.707107, 0.000000,
-                                    0.707107, 0.707107, 0.000000,
-                                    -0.382683, 0.923880, -0.000000,
-                                    0.382683, 0.923880, -0.000000,
-                                    0.000000, 1.000000, 0.000000,
-                                    0.000000, -0.923880, 0.382683,
-                                    -0.923880, -0.000000, 0.382683,
-                                    0.923880, -0.000000, 0.382683,
-                                    -0.000000, 0.923880, 0.382683,
-                                    -0.408248, -0.816497, 0.408248,
-                                    0.408248, -0.816497, 0.408248,
-                                    -0.816497, -0.408248, 0.408248,
-                                    0.816497, -0.408248, 0.408248,
-                                    -0.816497, 0.408248, 0.408248,
-                                    0.816497, 0.408248, 0.408248,
-                                    -0.408248, 0.816497, 0.408248,
-                                    0.408248, 0.816497, 0.408248,
-                                    -0.000000, -0.707107, 0.707107,
-                                    -0.707107, 0.000000, 0.707107,
-                                    0.707107, 0.000000, 0.707107,
-                                    0.000000, 0.707107, 0.707107,
-                                    -0.408248, -0.408248, 0.816497,
-                                    0.408248, -0.408248, 0.816497,
-                                    -0.408248, 0.408248, 0.816497,
-                                    0.408248, 0.408248, 0.816497,
-                                    0.000000, -0.382683, 0.923880,
-                                    -0.382683, -0.000000, 0.923880,
-                                    0.382683, -0.000000, 0.923880,
-                                    -0.000000, 0.382683, 0.923880,
-                                    0.000000, 0.000000, 1.000000).finished();
 
-    for (int i = 0; i < _N; ++i)
-    {
-        _laser_state.push_back(-10.0);
-    }
-
-    // _x_min = -15;
-    // _x_max = 15;
-
-    // _y_min = -15;
-    // _y_max = 15;
     _x_min = -10;
     _x_max = 10;
 
@@ -388,121 +330,10 @@ void RL_manager::init_variables()
     _imu_ready = false;
     _target_offset = 3.0;
 
-    _rows = 20;
-    _cols = 20;
+    _rows = 10;
+    _cols = 10;
     _init_counter = 0;
-    // range_image = sensor_msgs::Image();
-    // range_image.height = _rows;
-    // range_image.width = _cols;
-    // range_image.step = _cols; //fix this
     _range_image = cv::Mat::zeros(_rows,_cols,CV_8U);
     std::cout << "RANGE IMAGE CREATED" <<std::endl;
-    // std::cout << _range_image.at<uchar>(0,0) << std::endl;
 
-    
 }
-
-
-
-
-    // sensor_msgs::PointCloud2 pc2_msg;
-    // sensor_msgs::convertPointCloudToPointCloud2(pc_msg, pc2_msg);
-
-    // pcl::PointCloud<pcl::PointXYZ> pcl_cloud;
-    // pcl::fromROSMsg(pc2_msg,pcl_cloud);
-    // pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud_ptr;
-    // pcl_cloud_ptr = pcl_cloud.makeShared();
-
-    // Eigen::Vector3f p; 
-
-    // bool reset_bin = false;
-    // if(roll_bin != _prev_roll){
-    //     reset_bin = true;
-    // }
-    
-    // int prev_index = 0;
-    // for (int i = 0; i < pcl_cloud.size(); ++i){
-
-    //     p(0) = pcl_cloud.points[i].x;
-    //     p(1) = pcl_cloud.points[i].y;
-    //     p(2) = pcl_cloud.points[i].z;
-
-    //     double distance = p.norm();
-    //     p = p/distance;
-    //     Eigen::MatrixXf::Index maxIndex;
-    //     float max_value = (_dirs*p).maxCoeff(&maxIndex);
-
-    //     if(reset_bin){
-    //         _laser_state[maxIndex] = 10;
-    //     }
-    //     if(distance < _laser_state[maxIndex] || (_laser_state[maxIndex] < 0)){
-    //         _laser_state[maxIndex] = distance;
-    //     }
-    //     // int int_dist = floor(distance);
-    //     // if(int_dist < _laser_state[maxIndex] || (_laser_state[maxIndex] < 0)){
-    //     //     _laser_state[maxIndex] = int_dist;
-    //     // }
-    //     prev_index = int(maxIndex);
-    // }
-
-    // // if(roll_bin == _prev_roll){
-    // //     return;
-    // // }
-    // // _prev_roll = roll_bin;
-
-
-//   // std::cout << std::endl;
-//     std_msgs::Float64MultiArray state_msg;
-//     state_msg.data.clear();
-    
-//     pcl::PointCloud<pcl::PointXYZ> state_cloud;
-//     pcl::PointXYZ state_point;
-        
-//     for (int i = 0; i < _N; ++i)
-//     {
-//         // std::cout << _laser_state[i] << ", ";
-//         state_msg.data.push_back(_laser_state[i]);
-//         if(_laser_state[i] < 0){
-//             continue;
-//         }
-//         state_point.x = _dirs(i,0)*_laser_state[i];
-//         state_point.y = _dirs(i,1)*_laser_state[i];
-//         state_point.z = _dirs(i,2)*_laser_state[i];
-//         state_cloud.push_back(state_point);
-//     }
-
-//     tf::Transform target_transform;
-//     target_transform.setOrigin(tf::Vector3(_target_x,_target_y,_target_z));
-//     tf::Quaternion q2(0,0,0,1);
-//     target_transform.setRotation(q2);
-//     _br.sendTransform(tf::StampedTransform(target_transform,ros::Time::now(),"world","target"));
-
-//     // state_msg.data.push_back(_angular_velocity[0]);
-//     // state_msg.data.push_back(_angular_velocity[1]);
-//     // state_msg.data.push_back(_angular_velocity[2]);
-
-//     // state_msg.data.push_back(_linear_acceleration[0]);
-//     // state_msg.data.push_back(_linear_acceleration[1]);
-//     // state_msg.data.push_back(_linear_acceleration[2]);
-
-//     state_msg.data.push_back(_target_dir[0]);
-//     state_msg.data.push_back(_target_dir[1]);
-//     state_msg.data.push_back(_target_dir[2]);
-//     // state_msg.data.push_back(_target_localizability);
-    
-//     // state_msg.data.push_back(_target_theta);
-
-//     // state_msg.data.push_back(_current_pose[0]);
-//     // state_msg.data.push_back(_current_pose[1]);
-//     // state_msg.data.push_back(_current_pose[2]);
-//     // state_msg.data.push_back(_current_orientation[2]);
-
-
-//     // std::cout << std::endl;
-//     _state_pub.publish(state_msg);
-    
-//     sensor_msgs::PointCloud2 pc2_msg_out;
-//     pcl::toROSMsg(state_cloud, pc2_msg_out);
-//     pc2_msg_out.header.frame_id = "/base_link";
-//     _laser_pub.publish(pc2_msg_out);
-//     // ROS_INFO("PUBLISHING STATE");

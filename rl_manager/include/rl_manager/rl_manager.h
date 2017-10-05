@@ -49,6 +49,13 @@ public:
     void reset_sim_pose();
     bool check_occupancy(float x, float y, float z, float radius, bool use_cov);
 
+    void publish_laser_0(const sensor_msgs::LaserScan &msg);
+    void publish_laser_1(const sensor_msgs::LaserScan &msg);
+    void publish_laser_2(const sensor_msgs::LaserScan &msg);
+    void publish_laser_3(const sensor_msgs::LaserScan &msg);
+    void publish_laser_4(const sensor_msgs::LaserScan &msg);
+    void publish_laser_5(const sensor_msgs::LaserScan &msg);
+
     ros::NodeHandle nh;
 
     bool   _init, _tf_publishing, _imu_ready, _done;
@@ -62,6 +69,20 @@ public:
 
     ros::Publisher  _g2_pub, _laser_pub, _state_pub, _done_pub, _reset_pub, _marker_pub;
     ros::Subscriber _laser_sub, _imu_sub, _target_sub, _odom_sub;
+    ros::Subscriber _laser_sub_0;
+    ros::Subscriber _laser_sub_1;
+    ros::Subscriber _laser_sub_2;
+    ros::Subscriber _laser_sub_3;
+    ros::Subscriber _laser_sub_4;
+    ros::Subscriber _laser_sub_5;
+    
+    image_transport::Publisher _image_pub_0;
+    image_transport::Publisher _image_pub_1;
+    image_transport::Publisher _image_pub_2;
+    image_transport::Publisher _image_pub_3;
+    image_transport::Publisher _image_pub_4;
+    image_transport::Publisher _image_pub_5;
+
     ros::ServiceClient _client;
 
 
