@@ -280,7 +280,7 @@ void RL_manager::publish_state(const sensor_msgs::LaserScan &msg)
         {
             int pixel_value = int(255*(msg.ranges[index])/10.0);
 
-            if((!isnan(msg.ranges[index])) && (!isinf(msg.ranges[index]) && (msg.ranges[index]<10.0) ))
+            if((!std::isnan(msg.ranges[index])) && (!std::isinf(msg.ranges[index]) && (msg.ranges[index]<10.0) ))
             {
                 _range_image.at<uchar>(i,j) = pixel_value;
             }else{
