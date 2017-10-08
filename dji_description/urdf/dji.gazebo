@@ -18,7 +18,7 @@
     <sensor type="ray" name="block_laser_0">
       <pose>0 0 0 0 0 0</pose>
       <visualize>true</visualize>
-      <update_rate>20</update_rate>
+      <update_rate>10</update_rate>
       <ray>
         <scan>
           <horizontal>
@@ -60,8 +60,8 @@
   <gazebo reference="hokuyo_link">
     <sensor type="ray" name="block_laser_1">
       <pose>0 0 0 0 0 1.57079632679	</pose>
-      <visualize>true</visualize>
-      <update_rate>20</update_rate>
+      <visualize>false</visualize>
+      <update_rate>10</update_rate>
       <ray>
         <scan>
           <horizontal>
@@ -103,8 +103,8 @@
   <gazebo reference="hokuyo_link">
     <sensor type="ray" name="block_laser_2">
       <pose>0 0 0 0 0 3.1415926535</pose>
-      <visualize>true</visualize>
-      <update_rate>20</update_rate>
+      <visualize>false</visualize>
+      <update_rate>10</update_rate>
       <ray>
         <scan>
           <horizontal>
@@ -145,8 +145,8 @@
   <gazebo reference="hokuyo_link">
     <sensor type="ray" name="block_laser_3">
       <pose>0 0 0 0 0 -1.57079632679</pose>
-      <visualize>true</visualize>
-      <update_rate>20</update_rate>
+      <visualize>false</visualize>
+      <update_rate>10</update_rate>
       <ray>
         <scan>
           <horizontal>
@@ -187,8 +187,8 @@
   <gazebo reference="hokuyo_link">
     <sensor type="ray" name="block_laser_4">
       <pose>0 0 0 0 1.57079632679 0</pose>
-      <visualize>true</visualize>
-      <update_rate>20</update_rate>
+      <visualize>false</visualize>
+      <update_rate>10</update_rate>
       <ray>
         <scan>
           <horizontal>
@@ -229,8 +229,8 @@
 <gazebo reference="hokuyo_link">
     <sensor type="ray" name="block_laser_5">
       <pose>0 0 0 0 -1.57079632679 0</pose>
-      <visualize>true</visualize>
-      <update_rate>20</update_rate>
+      <visualize>false</visualize>
+      <update_rate>10</update_rate>
       <ray>
         <scan>
           <horizontal>

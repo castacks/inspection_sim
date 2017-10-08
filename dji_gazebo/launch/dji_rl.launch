@@ -34,7 +34,6 @@
   <include file="$(find rl_manager)/launch/rl_manager.launch"/>
   
 
-
   <!-- <node name="rviz_viz" pkg="rviz" type="rviz" args="-d $(find dji_gazebo)/rviz/dji_sim.rviz"/> -->
   
 <!--   <node name="octomap_server_node" pkg="octomap_server" type="octomap_server_node">

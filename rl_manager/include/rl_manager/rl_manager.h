@@ -39,7 +39,7 @@ public:
 	RL_manager();
 	~RL_manager();
 	
-	void publish_state(const sensor_msgs::LaserScan &msg);
+	void update_state(const sensor_msgs::LaserScan &msg, int laser_num);
     void imu_callback(const sensor_msgs::Imu &msg);
     void target_callback(const geometry_msgs::Vector3 &msg);
     void odom_callback(const nav_msgs::Odometry &msg);
@@ -76,12 +76,12 @@ public:
     ros::Subscriber _laser_sub_4;
     ros::Subscriber _laser_sub_5;
     
-    image_transport::Publisher _image_pub_0;
-    image_transport::Publisher _image_pub_1;
-    image_transport::Publisher _image_pub_2;
-    image_transport::Publisher _image_pub_3;
-    image_transport::Publisher _image_pub_4;
-    image_transport::Publisher _image_pub_5;
+    bool _im_received_0 = false;
+    bool _im_received_1 = false;
+    bool _im_received_2 = false;
+    bool _im_received_3 = false;
+    bool _im_received_4 = false;
+    bool _im_received_5 = false;
 
     ros::ServiceClient _client;
 
@@ -106,8 +106,10 @@ public:
 
 	boost::shared_ptr<DistMap> _map_ptr;
     int _rows, _cols;
-    image_transport::Publisher _image_pub;
+    image_transport::Publisher _image_pub, _debug_image_pub;
     cv::Mat _range_image;
+    cv::Mat _prev_range_image;
+    cv::Mat _combined_image;
     
     double _robot_x, _robot_y, _robot_z;
     int _init_counter;
