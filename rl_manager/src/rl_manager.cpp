@@ -23,12 +23,8 @@ RL_manager::RL_manager()
     _reset_pub.publish(pose_msg);
 
     image_transport::ImageTransport it(nh);
-    _image_pub_0 = it.advertise("range_image_0",1);
-    _image_pub_1 = it.advertise("range_image_1",1);
-    _image_pub_2 = it.advertise("range_image_2",1);
-    _image_pub_3 = it.advertise("range_image_3",1);
-    _image_pub_4 = it.advertise("range_image_4",1);
-    _image_pub_5 = it.advertise("range_image_5",1);
+    _image_pub = it.advertise("range_image",1);
+    _debug_image_pub = it.advertise("combined_image",1);
     
     _laser_pub = nh.advertise<sensor_msgs::PointCloud2>("/dji_sim/laser_state_cloud", 100);
     _state_pub = nh.advertise<std_msgs::Float64MultiArray>("/dji_sim/laser_state", 100);
@@ -38,7 +34,6 @@ RL_manager::RL_manager()
     // _odom_sub = nh.subscribe("/dji_sim/odometry", 1, &RL_manager::odom_callback, this);
     
     // _target_sub = nh.subscribe("/target_dir", 1, &RL_manager::target_callback, this);
-    _imu_sub = nh.subscribe("/dji_sim/imu", 1, &RL_manager::imu_callback, this);
 
     _laser_sub_0 = nh.subscribe("/dji_sim/laser/laserscan_0", 1, &RL_manager::publish_laser_0, this);
     _laser_sub_1 = nh.subscribe("/dji_sim/laser/laserscan_1", 1, &RL_manager::publish_laser_1, this);
@@ -69,7 +64,7 @@ RL_manager::RL_manager()
         // std::cout << "Current TRANSFORM: " << v.x() << " " << v.y() << " " << v.z() << " " << _x << " " << _y << " " << _z<<  std::endl;
         bool collision = check_occupancy(v.x(),-v.y(),-v.z(),_radius,false);
 
-        if(collision || v.x() > 2*_x_max || v.x() < 2*_x_min || v.y() > 2*_y_max || v.y() < 2*_y_min){
+        if(collision){
             // std_srvs::Empty::Request request;
             // std_srvs::Empty::Response response;
             // reset(request, response);
@@ -177,71 +172,44 @@ void RL_manager::generate_random_pose()
     // _target_localizability = _calc_localizability_ptr->estimate_localizablity(_target_x,_target_y,_target_z,_target_theta);
 }
 
-void RL_manager::imu_callback(const sensor_msgs::Imu &msg)
-{
-    tf::Quaternion q;
-    tf::quaternionMsgToTF(msg.orientation, q);
-    _orientation_matrix = tf::Matrix3x3(q);
-    
-    _angular_velocity[0] = msg.angular_velocity.x;
-    _angular_velocity[1] = msg.angular_velocity.y;
-    _angular_velocity[2] = msg.angular_velocity.z;
-    
-    _linear_acceleration[0] = msg.linear_acceleration.x;
-    _linear_acceleration[1] = msg.linear_acceleration.y;
-    _linear_acceleration[2] = msg.linear_acceleration.z;
-    _imu_ready = true;
-}
-
 void RL_manager::publish_laser_0(const sensor_msgs::LaserScan &msg)
 {
-    publish_state(msg);
-    sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", _range_image).toImageMsg();
-    _image_pub_0.publish(img_msg);
+    update_state(msg,0);
+    _im_received_0 = true;
 }
 
 void RL_manager::publish_laser_1(const sensor_msgs::LaserScan &msg)
 {
-    publish_state(msg);
-    sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", _range_image).toImageMsg();
-    _image_pub_1.publish(img_msg);
+    update_state(msg,1);
+    _im_received_1 = true;
 }
 
 void RL_manager::publish_laser_2(const sensor_msgs::LaserScan &msg)
 {
-    publish_state(msg);
-    sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", _range_image).toImageMsg();
-    _image_pub_2.publish(img_msg);
+    update_state(msg,2);
+    _im_received_2 = true;
 }
 
 void RL_manager::publish_laser_3(const sensor_msgs::LaserScan &msg)
 {
-    publish_state(msg);
-    sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", _range_image).toImageMsg();
-    _image_pub_3.publish(img_msg);
+    update_state(msg,3);
+    _im_received_3 = true;
 }
 
 void RL_manager::publish_laser_4(const sensor_msgs::LaserScan &msg)
 {
-    publish_state(msg);
-    sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", _range_image).toImageMsg();
-    _image_pub_4.publish(img_msg);
+    update_state(msg,4);
+    _im_received_4 = true;
 }
 
 void RL_manager::publish_laser_5(const sensor_msgs::LaserScan &msg)
 {
-    publish_state(msg);
-    sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", _range_image).toImageMsg();
-    _image_pub_5.publish(img_msg);
+    update_state(msg,5);
+    _im_received_5 = true;
 }
 
-void RL_manager::publish_state(const sensor_msgs::LaserScan &msg)
+void RL_manager::update_state(const sensor_msgs::LaserScan &msg, int laser_num)
 {
-
-    if(!_imu_ready){
-        ROS_INFO("WAITING FOR IMU DATA");
-        return;
-    }
     
     ROS_INFO_ONCE("Got laser scan");
     if(!_listener.waitForTransform(
@@ -282,9 +250,9 @@ void RL_manager::publish_state(const sensor_msgs::LaserScan &msg)
 
             if((!isnan(msg.ranges[index])) && (!isinf(msg.ranges[index]) && (msg.ranges[index]<10.0) ))
             {
-                _range_image.at<uchar>(i,j) = pixel_value;
+                _range_image.at<uchar>(i + laser_num*_rows,j) = pixel_value;
             }else{
-                _range_image.at<uchar>(i,j) = 255;
+                _range_image.at<uchar>(i + laser_num*_rows,j) = 255;
             }
             index--;
         }
@@ -296,8 +264,22 @@ void RL_manager::publish_state(const sensor_msgs::LaserScan &msg)
     target_transform.setRotation(q2);
     _br.sendTransform(tf::StampedTransform(target_transform,ros::Time::now(),"world","target"));
 
-
-
+    if(_im_received_0 && _im_received_1 && _im_received_2 && _im_received_3 && _im_received_4 && _im_received_5)
+    {
+        sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", _range_image).toImageMsg();        
+        _image_pub.publish(img_msg);
+        _im_received_0 = false;
+        _im_received_1 = false;
+        _im_received_2 = false;
+        _im_received_3 = false;
+        _im_received_4 = false;
+        _im_received_5 = false;
+        cv::Mat diff_image = ((_prev_range_image - _range_image))+127;
+        cv::hconcat(_range_image, diff_image, _combined_image);
+        sensor_msgs::ImagePtr combined_img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", _combined_image).toImageMsg();                
+        _debug_image_pub.publish(combined_img_msg);
+        _range_image.copyTo(_prev_range_image);
+    }
 }
 
 void RL_manager::init_variables()
@@ -327,13 +309,15 @@ void RL_manager::init_variables()
     _target_theta = 0;
     _target_localizability = 0;
     _radius = 1.0;
-    _imu_ready = false;
     _target_offset = 3.0;
 
     _rows = 10;
     _cols = 10;
     _init_counter = 0;
-    _range_image = cv::Mat::zeros(_rows,_cols,CV_8U);
+    _range_image = cv::Mat::zeros(6*_rows,_cols,CV_8U);
+    _prev_range_image = cv::Mat::zeros(6*_rows,_cols,CV_8U);
+    _combined_image = cv::Mat::zeros(6*_rows,2*_cols,CV_8U);
+
     std::cout << "RANGE IMAGE CREATED" <<std::endl;
 
 }
