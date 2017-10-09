@@ -14,52 +14,9 @@
     <material>Gazebo/Black</material>
   </gazebo>
 
-  <gazebo reference="hokuyo_link">
+  <gazebo reference="dji_link">
     <sensor type="ray" name="block_laser_0">
-      <pose>0 0 0 0 0 0</pose>
-      <visualize>true</visualize>
-      <update_rate>10</update_rate>
-      <ray>
-        <scan>
-          <horizontal>
-            <samples>10</samples>
-            <resolution>1</resolution>
-            <min_angle>-0.785</min_angle>
-            <max_angle>0.785</max_angle>
-          </horizontal>
-          <vertical>
-            <samples>10</samples>
-            <resolution>1</resolution>
-            <min_angle>-0.785</min_angle>
-            <max_angle>0.785</max_angle>
-          </vertical>
-        </scan>
-        <range>
-          <min>1.0</min> 
-          <max>10.0</max>
-          <resolution>0.01</resolution>
-        </range>
-        <noise>
-          <type>gaussian</type>
-          <!-- Noise parameters based on published spec for Hokuyo laser
-               achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
-               stddev of 0.01m will put 99.7% of samples within 0.03m of the true
-               reading. -->
-          <mean>0.0</mean>
-          <stddev>0.01</stddev>
-        </noise>
-      </ray>
-      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_laser.so">
-        <topicName>/dji_sim/laser/laserscan_0</topicName>
-        <frameName>hokuyo_link</frameName>
-      </plugin>
-    </sensor>
-</gazebo>
-  
-
-  <gazebo reference="hokuyo_link">
-    <sensor type="ray" name="block_laser_1">
-      <pose>0 0 0 0 0 1.57079632679	</pose>
+      <pose>0 0 .3 0 0 0</pose>
       <visualize>false</visualize>
       <update_rate>10</update_rate>
       <ray>
@@ -92,17 +49,60 @@
           <stddev>0.01</stddev>
         </noise>
       </ray>
-      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_laser.so">
+      <plugin name="hokuyo_controller" filename="libgazebo_ros_laser.so">
+        <topicName>/dji_sim/laser/laserscan_0</topicName>
+        <frameName>dji_link</frameName>
+      </plugin>
+    </sensor>
+</gazebo>
+  
+
+  <gazebo reference="dji_link">
+    <sensor type="ray" name="block_laser_1">
+      <pose>0 0 .3 0 0 1.57079632679	</pose>
+      <visualize>false</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>10</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.785</min_angle>
+            <max_angle>0.785</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>10</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.785</min_angle>
+            <max_angle>0.785</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>1.0</min> 
+          <max>10.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise parameters based on published spec for Hokuyo laser
+               achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
+               stddev of 0.01m will put 99.7% of samples within 0.03m of the true
+               reading. -->
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="hokuyo_controller" filename="libgazebo_ros_laser.so">
         <topicName>/dji_sim/laser/laserscan_1</topicName>
-        <frameName>hokuyo_link</frameName>
+        <frameName>dji_link</frameName>
       </plugin>
     </sensor>
 </gazebo>
 
 
-  <gazebo reference="hokuyo_link">
+  <gazebo reference="dji_link">
     <sensor type="ray" name="block_laser_2">
-      <pose>0 0 0 0 0 3.1415926535</pose>
+      <pose>0 0 .3 0 0 3.1415926535</pose>
       <visualize>false</visualize>
       <update_rate>10</update_rate>
       <ray>
@@ -137,14 +137,14 @@
       </ray>
       <plugin name="hokuyo_controller" filename="libgazebo_ros_laser.so">
         <topicName>/dji_sim/laser/laserscan_2</topicName>
-        <frameName>hokuyo_link</frameName>
+        <frameName>dji_link</frameName>
       </plugin>
     </sensor>
 </gazebo>
 
-  <gazebo reference="hokuyo_link">
+  <gazebo reference="dji_link">
     <sensor type="ray" name="block_laser_3">
-      <pose>0 0 0 0 0 -1.57079632679</pose>
+      <pose>0 0 .3 0 0 -1.57079632679</pose>
       <visualize>false</visualize>
       <update_rate>10</update_rate>
       <ray>
@@ -179,14 +179,14 @@
       </ray>
       <plugin name="hokuyo_controller" filename="libgazebo_ros_laser.so">
         <topicName>/dji_sim/laser/laserscan_3</topicName>
-        <frameName>hokuyo_link</frameName>
+        <frameName>dji_link</frameName>
       </plugin>
     </sensor>
 </gazebo>
 
-  <gazebo reference="hokuyo_link">
+  <gazebo reference="dji_link">
     <sensor type="ray" name="block_laser_4">
-      <pose>0 0 0 0 1.57079632679 0</pose>
+      <pose>0 0 .3 0 1.57079632679 0</pose>
       <visualize>false</visualize>
       <update_rate>10</update_rate>
       <ray>
@@ -221,14 +221,14 @@
       </ray>
       <plugin name="hokuyo_controller" filename="libgazebo_ros_laser.so">
         <topicName>/dji_sim/laser/laserscan_4</topicName>
-        <frameName>hokuyo_link</frameName>
+        <frameName>dji_link</frameName>
       </plugin>
     </sensor>
 </gazebo>
 
-<gazebo reference="hokuyo_link">
+<gazebo reference="dji_link">
     <sensor type="ray" name="block_laser_5">
-      <pose>0 0 0 0 -1.57079632679 0</pose>
+      <pose>0 0 .3 0 -1.57079632679 0</pose>
       <visualize>false</visualize>
       <update_rate>10</update_rate>
       <ray>
@@ -263,7 +263,7 @@
       </ray>
       <plugin name="hokuyo_controller" filename="libgazebo_ros_laser.so">
         <topicName>/dji_sim/laser/laserscan_5</topicName>
-        <frameName>hokuyo_link</frameName>
+        <frameName>dji_link</frameName>
       </plugin>
     </sensor>
 </gazebo>

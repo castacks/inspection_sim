@@ -26,8 +26,9 @@ RobotControl::RobotControl(ros::NodeHandle &nh)
 {
     _nh_ptr.reset(&nh);
 
-    geometry_msgs::Pose zero_msg;
-    reset(zero_msg);
+    geometry_msgs::Pose start_pose;
+    start_pose.position.z = 1.0;
+    reset(start_pose);
 
     _model_sub = nh.subscribe("/gazebo/model_states", 100, &RobotControl::pose_callback, this);
     _target_sub = nh.subscribe("/dji_sim/target_pose", 100, &RobotControl::target_callback, this);
@@ -136,6 +137,7 @@ void RobotControl::reset(const geometry_msgs::Pose &msg)
     _target_accel.setZero();
     _target_orientation.setZero();
     _target_orientation_prev.setZero();
+    _target_angular_velocity.setZero();
 
     _target_round = 0.0;
     _pose_round = 0.0;
@@ -156,7 +158,8 @@ void RobotControl::reset(const geometry_msgs::Pose &msg)
 
     _force.setZero();
     _torque.setZero();
-
+    std::cout << "INIT TORQUE: " << _torque.x() << " " << _torque.y() << " " << _torque.z() << std::endl;
+    
     _acc_noise.setZero();
     _gyr_noise.setZero();
     _acc_bias_noise.setZero();
@@ -289,7 +292,6 @@ void RobotControl::update_control()
     // error
     _pos_err = _target_position    - _est_position;
     _ori_err = _target_orientation - _orientation;
-
     // derivative of error
     if(_init_ctrl) {
         _pos_err_d.setZero();
@@ -683,10 +685,9 @@ void RobotControl::publish_control()
 
     geometry_msgs::Point torque_msg;
 
-    torque_msg.x = _torque.x();
-    torque_msg.y = _torque.y();
-    torque_msg.z = _torque.z();
-
+    torque_msg.x = 0.0;
+    torque_msg.y = 0.0;
+    torque_msg.z = 0.0;
     _torque_pub.publish(torque_msg);
 }
 

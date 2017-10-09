@@ -13,9 +13,16 @@ RL_manager::RL_manager()
     _map_ptr = boost::shared_ptr<DistMap>(new DistMap(nh));
 
     // reset();
+    ROS_INFO("START");
+    
     init_variables();
+    ROS_INFO("INIT VARABILES");    
     generate_random_pose();
+    ROS_INFO("GEN POSE");    
     reset_sim_pose();
+    ROS_INFO("SIM POSE RESET");
+    _reset_pub = nh.advertise<geometry_msgs::Pose>("/dji_sim/reset", 100);
+    
     geometry_msgs::Pose pose_msg;
     pose_msg.position.x = _x;
     pose_msg.position.y = _y;
@@ -29,12 +36,12 @@ RL_manager::RL_manager()
     _laser_pub = nh.advertise<sensor_msgs::PointCloud2>("/dji_sim/laser_state_cloud", 100);
     _state_pub = nh.advertise<std_msgs::Float64MultiArray>("/dji_sim/laser_state", 100);
     _done_pub = nh.advertise<std_msgs::Bool>("/dji_sim/collision", 100);
-    _reset_pub = nh.advertise<geometry_msgs::Pose>("/dji_sim/reset", 100);
     _marker_pub = nh.advertise<visualization_msgs::Marker>("visualization_marker", 10);
     // _odom_sub = nh.subscribe("/dji_sim/odometry", 1, &RL_manager::odom_callback, this);
     
     // _target_sub = nh.subscribe("/target_dir", 1, &RL_manager::target_callback, this);
-
+    ROS_INFO("Setup done. initing subscribers");
+    
     _laser_sub_0 = nh.subscribe("/dji_sim/laser/laserscan_0", 1, &RL_manager::publish_laser_0, this);
     _laser_sub_1 = nh.subscribe("/dji_sim/laser/laserscan_1", 1, &RL_manager::publish_laser_1, this);
     _laser_sub_2 = nh.subscribe("/dji_sim/laser/laserscan_2", 1, &RL_manager::publish_laser_2, this);
@@ -63,7 +70,6 @@ RL_manager::RL_manager()
         tf::Vector3 v = transform.getOrigin();
         // std::cout << "Current TRANSFORM: " << v.x() << " " << v.y() << " " << v.z() << " " << _x << " " << _y << " " << _z<<  std::endl;
         bool collision = check_occupancy(v.x(),-v.y(),-v.z(),_radius,false);
-
         if(collision){
             // std_srvs::Empty::Request request;
             // std_srvs::Empty::Response response;
@@ -85,6 +91,7 @@ bool RL_manager::check_occupancy(float x, float y, float z, float radius, bool u
     // std::cout << p << std::endl;
     float dist;
     //get obstacle in world cords
+    // std::cout << p.x() << " " << p.y() << " " << p.z() << std::endl;
     _map_ptr->get_closest_obstacle(p,dist,obstacle);
     geometry_msgs::PointStamped Point_msg;
     Point_msg.point.x = obstacle.x();
@@ -142,17 +149,20 @@ void RL_manager::generate_random_pose()
     bool found_good_pose = false;
     std::random_device rd;  //Will be used to obtain a seed for the random number engine
     std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    std::uniform_real_distribution<> x_dis(_x_min, _x_max);
+    std::uniform_real_distribution<> y_dis(_y_min, _y_max);
+    std::uniform_real_distribution<> z_dis(_z_min, _z_max);
     std::uniform_real_distribution<> dis(0, 1);
     
     while(!found_good_pose && ros::ok())
     {
-        std::cout << dis(gen) << std::endl;
-        _x = (_x_max-_x_min)*dis(gen) + _x_min;
-        _y = (_y_max-_y_min)*dis(gen) + _y_min;
-        _z = (_z_max-_z_min)*dis(gen) + _z_min;
+        _x = x_dis(gen);
+        _y = y_dis(gen);
+        _z = z_dis(gen);
         // _theta = (2*M_PI)*((double) rand() / (RAND_MAX));
         _theta = 0.0;
         // CHECK OCCUPANCY
+        
         found_good_pose = !check_occupancy(_x,_y,_z,1.25*_radius,false);
         // found_good_pose = _calc_localizability_ptr->check_neighborhood_occupancy(_x,_y,_z,_radius);
     }
@@ -317,7 +327,5 @@ void RL_manager::init_variables()
     _range_image = cv::Mat::zeros(6*_rows,_cols,CV_8U);
     _prev_range_image = cv::Mat::zeros(6*_rows,_cols,CV_8U);
     _combined_image = cv::Mat::zeros(6*_rows,2*_cols,CV_8U);
-
-    std::cout << "RANGE IMAGE CREATED" <<std::endl;
 
 }
