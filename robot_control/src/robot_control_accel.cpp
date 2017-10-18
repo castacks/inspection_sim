@@ -158,7 +158,6 @@ void RobotControl::reset(const geometry_msgs::Pose &msg)
 
     _force.setZero();
     _torque.setZero();
-    std::cout << "INIT TORQUE: " << _torque.x() << " " << _torque.y() << " " << _torque.z() << std::endl;
     
     _acc_noise.setZero();
     _gyr_noise.setZero();

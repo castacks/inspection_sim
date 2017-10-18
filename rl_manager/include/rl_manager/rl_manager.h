@@ -67,7 +67,7 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     Eigen::MatrixXf _dirs;
 
-    ros::Publisher  _g2_pub, _laser_pub, _state_pub, _done_pub, _reset_pub, _marker_pub;
+    ros::Publisher  _g2_pub, _laser_pub, _state_pub, _done_pub, _reset_pub, _marker_pub, _obstacle_pub;
     ros::Subscriber _laser_sub, _imu_sub, _target_sub, _odom_sub;
     ros::Subscriber _laser_sub_0;
     ros::Subscriber _laser_sub_1;
