@@ -72,9 +72,6 @@ RL_manager::RL_manager()
         // std::cout << "Current TRANSFORM: " << v.x() << " " << v.y() << " " << v.z() << " " << _x << " " << _y << " " << _z<<  std::endl;
         bool collision = check_occupancy(v.x(),-v.y(),-v.z(),_radius,false);
         if(collision){
-            // std_srvs::Empty::Request request;
-            // std_srvs::Empty::Response response;
-            // reset(request, response);
             std_msgs::Bool done_msg;
             done_msg.data = true;
             _done_pub.publish(done_msg);

@@ -252,8 +252,8 @@ void RobotControl::pose_callback(const gazebo_msgs::ModelStates::Ptr &msg)
 
             update_time();
             update_accel_control();
-            publish_control();
             update_state();
+            publish_control();
             publish_state();
             publish_tf();
             generate_noise();
@@ -280,8 +280,8 @@ void RobotControl::update_time()
     }
     _time_old = _time;
 
-    if(fabs(_dt) > 1.5 / _freq || fabs(_dt) < 0.7 / _freq) {
-//        ROS_WARN("robot_control: dt = %0.4f", _dt);
+    if(fabs(_dt) > 2.5 / _freq || fabs(_dt) < 0.7 / _freq) {
+    //    ROS_WARN("robot_control: dt = %0.4f", _dt);
         _dt = 1.0/_freq;
     }
 }
