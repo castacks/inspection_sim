@@ -9,7 +9,12 @@
 RL_manager::RL_manager()
 {
     ros::NodeHandle nh;
-
+    _obstacle_pub = nh.advertise<std_msgs::Float64>("/dji_sim/closest_obstacle", 100);
+    _laser_pub = nh.advertise<sensor_msgs::PointCloud2>("/dji_sim/laser_state_cloud", 100);
+    _state_pub = nh.advertise<std_msgs::Float64MultiArray>("/dji_sim/laser_state", 100);
+    _done_pub = nh.advertise<std_msgs::Bool>("/dji_sim/collision", 100);
+    _marker_pub = nh.advertise<visualization_msgs::Marker>("visualization_marker", 10);
+    
     _map_ptr = boost::shared_ptr<DistMap>(new DistMap(nh));
 
     // reset();
@@ -33,11 +38,6 @@ RL_manager::RL_manager()
     _image_pub = it.advertise("range_image",1);
     _debug_image_pub = it.advertise("combined_image",1);
     
-    _obstacle_pub = nh.advertise<std_msgs::Float64>("/dji_sim/closest_obstacle", 100);
-    _laser_pub = nh.advertise<sensor_msgs::PointCloud2>("/dji_sim/laser_state_cloud", 100);
-    _state_pub = nh.advertise<std_msgs::Float64MultiArray>("/dji_sim/laser_state", 100);
-    _done_pub = nh.advertise<std_msgs::Bool>("/dji_sim/collision", 100);
-    _marker_pub = nh.advertise<visualization_msgs::Marker>("visualization_marker", 10);
     // _odom_sub = nh.subscribe("/dji_sim/odometry", 1, &RL_manager::odom_callback, this);
     
     // _target_sub = nh.subscribe("/target_dir", 1, &RL_manager::target_callback, this);
@@ -53,11 +53,11 @@ RL_manager::RL_manager()
     _client = nh.serviceClient<gazebo_msgs::SetModelState>("/gazebo/set_model_state");
     ros::ServiceServer reset_service = nh.advertiseService("/dji_sim/reset_service", &RL_manager::reset, this);
     // <std_srvs::Empty::Request, std_srvs::Empty::Response>
-    ros::Rate r(20);
+    ros::Rate r(100);
     while(ros::ok())
     {
         ros::spinOnce();
-        // r.sleep();
+        r.sleep();
 
         tf::StampedTransform transform;
         try{
@@ -97,9 +97,9 @@ bool RL_manager::check_occupancy(float x, float y, float z, float radius, bool u
     Point_msg.point.z = obstacle.z();
     Point_msg.header.frame_id = "world";
     _listener.transformPoint("base_link",Point_msg,Point_msg);
-    // std_msgs::Float64 float_msg;
-    // float_msg.data = dist;
-    // _obstacle_pub.publish(float_msg);
+    std_msgs::Float64 float_msg;
+    float_msg.data = dist;
+    _obstacle_pub.publish(float_msg);
     // std::cout << obstacle << std::endl;
     if(use_cov){
         //use control cov to check for 3 sigma safety
