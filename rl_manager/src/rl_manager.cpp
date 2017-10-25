@@ -167,10 +167,14 @@ void RL_manager::generate_random_pose()
         found_good_pose = !check_occupancy(_x,_y,_z,1.25*_radius,false);
         // found_good_pose = _calc_localizability_ptr->check_neighborhood_occupancy(_x,_y,_z,_radius);
     }
-    std::uniform_real_distribution<> target_dis(-_target_offset, _target_offset);
-    _target_x = _x + target_dis(gen)*(dis(gen));
-    _target_y = _y + target_dis(gen)*(dis(gen));
-    _target_z = _z + target_dis(gen)*(dis(gen));
+    std::uniform_real_distribution<> target_dis(-1, 1);
+    float dx = target_dis(gen);
+    float dy = target_dis(gen);
+    float dz = target_dis(gen);
+    float target_distance = sqrt(dx*dx + dy*dy + dz*dz);
+    _target_x = _x + _target_offset*dx/target_distance;
+    _target_y = _y + _target_offset*dy/target_distance;
+    _target_z = _z + _target_offset*dz/target_distance;
     // double target_distance = sqrt(_target_x*_target_x + _target_y*_target_y + _target_z*_target_z);
     // _target_x = _target_x;
     // _target_y = _target_y;
@@ -321,7 +325,7 @@ void RL_manager::init_variables()
     _target_theta = 0;
     _target_localizability = 0;
     _radius = 1.0;
-    _target_offset = 3.0;
+    _target_offset = 5.0;
 
     _rows = 10;
     _cols = 10;
