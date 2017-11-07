@@ -3,4 +3,12 @@
 	<node pkg="tf" type="static_transform_publisher" name="world_to_gazebo_world"  args="0 0 0 0 0 3.1415926 /world  /gazebo_world  100" />
 	<node pkg="tf" type="static_transform_publisher" name="dji_link_to_base_link"  args="0 0 0 0 0 3.1415926 /dji_link /base_link  100" />
 	<node pkg="tf" type="static_transform_publisher" name="camera_link_to_camera"  args="0 0 0 -1.5707963 0 -1.5707963 /camera_link /camera  100" />
+	
+	<!-- <node pkg="tf" type="static_transform_publisher" name="dji_link_to_camera1"  args="0 0 0 0 -1.5707963 0          /dji_link /camera1  100" /> -->
+	<!-- <node pkg="tf" type="static_transform_publisher" name="dji_link_to_camera2"  args="0 0 0 0 -1.5707963  1.5707963 /dji_link /camera2  100" /> -->
+	<!-- <node pkg="tf" type="static_transform_publisher" name="dji_link_to_camera3"  args="0 0 0 -1.5707963 0 -1.5707963 /dji_link /camera  100" /> -->
+	<!-- <node pkg="tf" type="static_transform_publisher" name="dji_link_to_camera4"  args="0 0 0 -1.5707963 0 -1.5707963 /dji_link /camera  100" /> -->
+	<!-- <node pkg="tf" type="static_transform_publisher" name="dji_link_to_camera5"  args="0 0 0 -1.5707963 0 -1.5707963 /dji_link /camera  100" /> -->
+	<!-- <node pkg="tf" type="static_transform_publisher" name="dji_link_to_camera6"  args="0 0 0 -1.5707963 0 -1.5707963 /dji_link /camera  100" /> -->
+	
 </launch>

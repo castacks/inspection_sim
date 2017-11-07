@@ -40,13 +40,13 @@
         <visual name="visual">
           <geometry>
 
-            <mesh><uri>file:///home/weikunz/catkin/djisim_ws/src/inspection_sim/dji_gazebo/models/tunnel_dae.dae</uri><scale>0.1 0.1 0.1</scale></mesh>
+            <mesh><uri>file:///home/slz/inspection_ws/src/inspection_sim/dji_gazebo/models/tunnel.dae</uri><scale>0.1 0.1 0.1</scale></mesh>
           </geometry>
         </visual>
         
         <collision name="collision">
           <geometry>	
-	        <mesh><uri>file:///home/weikunz/catkin/djisim_ws/src/inspection_sim/dji_gazebo/models/tunnel_dae.dae</uri><scale>0.1 0.1 0.1</scale></mesh>
+	        <mesh><uri>file:///home/slz/inspection_ws/src/inspection_sim/dji_gazebo/models/tunnel.dae</uri><scale>0.1 0.1 0.1</scale></mesh>
           </geometry>
         </collision>
       </link>
