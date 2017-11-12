@@ -18,18 +18,17 @@
   <gazebo reference="dji_link">
     <sensor type="depth" name="depth_camera1">
       <pose>0 0 0 0 0 0</pose>
-      <update_rate>30.0</update_rate>
+      <update_rate>5.0</update_rate>
       <camera name="head">
         <horizontal_fov>1.5707</horizontal_fov>
-        <vertical_fov>1.5707</vertical_fov>
-        
+
         <image>
-          <width>100</width>
-          <height>100</height>
+          <width>50</width>
+          <height>50</height>
           <format>R8G8B8</format>
         </image>
         <clip>
-          <near>1.0</near>
+          <near>0.8</near>
           <far>100.0</far>
         </clip>
         <noise>
@@ -43,7 +42,7 @@
       </camera>
       <plugin name="camera_plugin" filename="libgazebo_ros_depth_camera.so">
         <alwaysOn>true</alwaysOn>
-        <updateRate>20.0</updateRate>
+        <!-- <updateRate>20.0</updateRate> -->
         <cameraName>rrbot/camera1</cameraName>
         <imageTopicName>image_raw</imageTopicName>
         <depthImageTopicName>depth_1</depthImageTopicName>
@@ -64,18 +63,17 @@
   <gazebo reference="dji_link">
     <sensor type="depth" name="depth_camera2">
       <pose>0 0 0 0 0 -1.5707</pose>
-      <update_rate>30.0</update_rate>
+      <update_rate>5.0</update_rate>
       <camera name="head">
         <horizontal_fov>1.5707</horizontal_fov>
-        <vertical_fov>1.5707</vertical_fov>
-        
+
         <image>
-          <width>100</width>
-          <height>100</height>
+          <width>50</width>
+          <height>50</height>
           <format>R8G8B8</format>
         </image>
         <clip>
-          <near>1.0</near>
+          <near>0.8</near>
           <far>100.0</far>
         </clip>
         <noise>
@@ -89,7 +87,7 @@
       </camera>
       <plugin name="camera_plugin" filename="libgazebo_ros_depth_camera.so">
         <alwaysOn>true</alwaysOn>
-        <updateRate>20.0</updateRate>
+        <!-- <updateRate>20.0</updateRate> -->
         <cameraName>rrbot/camera2</cameraName>
         <imageTopicName>image_raw</imageTopicName>
         <depthImageTopicName>depth_2</depthImageTopicName>
@@ -110,18 +108,17 @@
   <gazebo reference="dji_link">
     <sensor type="depth" name="depth_camera3">
       <pose>0 0 0 0 0 3.1415</pose>
-      <update_rate>30.0</update_rate>
+      <update_rate>5.0</update_rate>
       <camera name="head">
         <horizontal_fov>1.5707</horizontal_fov>
-        <vertical_fov>1.5707</vertical_fov>
-        
+
         <image>
-          <width>100</width>
-          <height>100</height>
+          <width>50</width>
+          <height>50</height>
           <format>R8G8B8</format>
         </image>
         <clip>
-          <near>1.0</near>
+          <near>0.8</near>
           <far>100.0</far>
         </clip>
         <noise>
@@ -135,7 +132,7 @@
       </camera>
       <plugin name="camera_plugin" filename="libgazebo_ros_depth_camera.so">
         <alwaysOn>true</alwaysOn>
-        <updateRate>20.0</updateRate>
+        <!-- <updateRate>20.0</updateRate> -->
         <cameraName>rrbot/camera3</cameraName>
         <imageTopicName>image_raw</imageTopicName>
         <depthImageTopicName>depth_3</depthImageTopicName>
@@ -155,18 +152,17 @@
   <gazebo reference="dji_link">
     <sensor type="depth" name="depth_camera4">
       <pose>0 0 0 0 0 1.5707</pose>
-      <update_rate>30.0</update_rate>
+      <update_rate>5.0</update_rate>
       <camera name="head">
         <horizontal_fov>1.5707</horizontal_fov>
-        <vertical_fov>1.5707</vertical_fov>
-        
+
         <image>
-          <width>100</width>
-          <height>100</height>
+          <width>50</width>
+          <height>50</height>
           <format>R8G8B8</format>
         </image>
         <clip>
-          <near>1.0</near>
+          <near>0.8</near>
           <far>100.0</far>
         </clip>
         <noise>
@@ -180,7 +176,7 @@
       </camera>
       <plugin name="camera_plugin" filename="libgazebo_ros_depth_camera.so">
         <alwaysOn>true</alwaysOn>
-        <updateRate>20.0</updateRate>
+        <!-- <updateRate>20.0</updateRate> -->
         <cameraName>rrbot/camera4</cameraName>
         <imageTopicName>image_raw</imageTopicName>
         <depthImageTopicName>depth_4</depthImageTopicName>
@@ -201,18 +197,17 @@
   <gazebo reference="dji_link">
     <sensor type="depth" name="depth_camera5">
       <pose>0 0 0 0 -1.5707 0</pose>
-      <update_rate>30.0</update_rate>
+      <update_rate>5.0</update_rate>
       <camera name="head">
         <horizontal_fov>1.5707</horizontal_fov>
-        <vertical_fov>1.5707</vertical_fov>
-        
+
         <image>
-          <width>100</width>
-          <height>100</height>
+          <width>50</width>
+          <height>50</height>
           <format>R8G8B8</format>
         </image>
         <clip>
-          <near>1.0</near>
+          <near>0.8</near>
           <far>100.0</far>
         </clip>
         <noise>
@@ -226,7 +221,7 @@
       </camera>
       <plugin name="camera_plugin" filename="libgazebo_ros_depth_camera.so">
         <alwaysOn>true</alwaysOn>
-        <updateRate>20.0</updateRate>
+        <!-- <updateRate>20.0</updateRate> -->
         <cameraName>rrbot/camera5</cameraName>
         <imageTopicName>image_raw</imageTopicName>
         <depthImageTopicName>depth_5</depthImageTopicName>
@@ -247,18 +242,17 @@
   <gazebo reference="dji_link">
     <sensor type="depth" name="depth_camera6">
       <pose>0 0 0 0 1.5707 0</pose>
-      <update_rate>30.0</update_rate>
+      <update_rate>5.0</update_rate>
       <camera name="head">
         <horizontal_fov>1.5707</horizontal_fov>
-        <vertical_fov>1.5707</vertical_fov>
-        
+
         <image>
-          <width>100</width>
-          <height>100</height>
+          <width>50</width>
+          <height>50</height>
           <format>R8G8B8</format>
         </image>
         <clip>
-          <near>1.0</near>
+          <near>0.8</near>
           <far>100.0</far>
         </clip>
         <noise>
@@ -272,7 +266,7 @@
       </camera>
       <plugin name="camera_plugin" filename="libgazebo_ros_depth_camera.so">
         <alwaysOn>true</alwaysOn>
-        <updateRate>20.0</updateRate>
+        <!-- <updateRate>20.0</updateRate> -->
         <cameraName>rrbot/camera6</cameraName>
         <imageTopicName>image_raw</imageTopicName>
         <depthImageTopicName>depth_6</depthImageTopicName>

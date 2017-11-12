@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <launch>
 
+  <arg name="use_sim_time" default="true"/>
+  
   <node name="robot_control" pkg="robot_control" type="robot_control_accel_node" output="screen">
     <param name="mass"              type="double"           value="1.0"/>
     <param name="inertia"           type="double"           value="0.2"/>
