@@ -5,8 +5,8 @@
   <!-- Constants for robot dimensions -->
   <xacro:property name="PI" value="3.1415926535897931"/>
   <xacro:property name="mass" value="30" /> <!-- arbitrary value for mass -->
-  <xacro:property name="width" value="1.0" /> <!-- Square dimensions (widthxwidth) of beams -->
-  <xacro:property name="height" value="0.5" /> <!-- DJI height -->
+  <xacro:property name="width" value="0.01" /> <!-- Square dimensions (widthxwidth) of beams -->
+  <xacro:property name="height" value="0.01" /> <!-- DJI height -->
 
   <!-- Import all Gazebo-customization elements, including Gazebo colors -->
   <xacro:include filename="$(find dji_description)/urdf/dji.gazebo" />
@@ -48,36 +48,36 @@
 
   </link>
 
-  <joint name="hokuyo_joint" type="fixed">
-    <parent link="dji_link"/>
-    <child link="hokuyo_link"/>
-    <origin xyz="0.0 0 ${height/2}" rpy="0 0 0"/>
-    <axis xyz="1 0 0"/>
-  </joint>
+  <!-- <joint name="hokuyo_joint" type="fixed"> -->
+    <!-- <parent link="dji_link"/> -->
+    <!-- <child link="hokuyo_link"/> -->
+    <!-- <origin xyz="0.0 0 ${height/2}" rpy="0 0 0"/> -->
+    <!-- <axis xyz="1 0 0"/> -->
+  <!-- </joint> -->
 
   <!-- Hokuyo Laser -->
-  <link name="hokuyo_link">
-    <collision>
-      <origin xyz="0 0 0.0" rpy="0 0 0"/>
-      <geometry>
-	    <box size="0.1 0.1 0.1"/>
-      </geometry>
-    </collision>
+  <!-- <link name="hokuyo_link"> -->
+    <!-- <collision> -->
+      <!-- <origin xyz="0 0 0.0" rpy="0 0 0"/> -->
+      <!-- <geometry> -->
+	    <!-- <box size="0.1 0.1 0.1"/> -->
+      <!-- </geometry> -->
+    <!-- </collision> -->
 
-    <visual>
-      <origin xyz="0 0 0.0" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="package://dji_description/meshes/hokuyo_utm_30lx.dae"/> 
+    <!-- <visual> -->
+      <!-- <origin xyz="0 0 0.0" rpy="0 0 0"/> -->
+      <!-- <geometry> -->
+        <!-- <mesh filename="package://dji_description/meshes/hokuyo_utm_30lx.dae"/>  -->
         <!--<box size="0.1 0.1 0.1"/>-->
-      </geometry>
-    </visual>
+      <!-- </geometry> -->
+    <!-- </visual> -->
 
-    <inertial>
-      <mass value="0.1" />
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
-    </inertial>
-  </link>
+    <!-- <inertial> -->
+      <!-- <mass value="0.1" /> -->
+      <!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
+      <!-- <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" /> -->
+    <!-- </inertial> -->
+  <!-- </link> -->
 
   <joint name="camera_joint1" type="fixed">
     <parent link="dji_link"/>

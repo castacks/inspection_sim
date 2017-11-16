@@ -34,19 +34,19 @@
     </include>
     
     <model name="bridge">
-      <pose>60 0 0 1.5707963 0 3.1415926</pose>
+      <pose>120 -3 -2.5 0 0 3.141592</pose>
       <static>true</static>
       <link name="body">
         <visual name="visual">
           <geometry>
 
-            <mesh><uri>file:///home/slz/inspection_ws/src/inspection_sim/dji_gazebo/models/tunnel.dae</uri><scale>0.1 0.1 0.1</scale></mesh>
+            <mesh><uri>file:///home/slz/inspection_ws/src/inspection_sim/dji_gazebo/models/tunnel_closed.dae</uri><scale>0.1 0.1 0.1</scale></mesh>
           </geometry>
         </visual>
         
         <collision name="collision">
           <geometry>	
-	        <mesh><uri>file:///home/slz/inspection_ws/src/inspection_sim/dji_gazebo/models/tunnel.dae</uri><scale>0.1 0.1 0.1</scale></mesh>
+	        <mesh><uri>file:///home/slz/inspection_ws/src/inspection_sim/dji_gazebo/models/tunnel_closed.dae</uri><scale>0.1 0.1 0.1</scale></mesh>
           </geometry>
         </collision>
       </link>

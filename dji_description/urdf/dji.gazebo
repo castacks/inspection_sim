@@ -2,12 +2,12 @@
 <robot>
 
   <!-- ros_control plugin -->
-  <gazebo>
-    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-      <robotNamespace>/g2</robotNamespace>
-      <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
-    </plugin>
-  </gazebo>
+  <!-- <gazebo> -->
+    <!-- <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so"> -->
+      <!-- <robotNamespace>/g2</robotNamespace> -->
+      <!-- <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType> -->
+    <!-- </plugin> -->
+  <!-- </gazebo> -->
 
   <!-- Link1 -->
   <gazebo reference="dji_link">
@@ -18,18 +18,18 @@
   <gazebo reference="dji_link">
     <sensor type="depth" name="depth_camera1">
       <pose>0 0 0 0 0 0</pose>
-      <update_rate>5.0</update_rate>
-      <camera name="head">
+      <update_rate>3.0</update_rate>
+      <camera name="d1">
         <horizontal_fov>1.5707</horizontal_fov>
 
         <image>
           <width>50</width>
           <height>50</height>
-          <format>R8G8B8</format>
+          <format>L8</format>
         </image>
         <clip>
-          <near>0.8</near>
-          <far>100.0</far>
+          <near>0.5</near>
+          <far>10.0</far>
         </clip>
         <noise>
           <type>gaussian</type>
@@ -63,18 +63,18 @@
   <gazebo reference="dji_link">
     <sensor type="depth" name="depth_camera2">
       <pose>0 0 0 0 0 -1.5707</pose>
-      <update_rate>5.0</update_rate>
-      <camera name="head">
+      <update_rate>3.0</update_rate>
+      <camera name="d2">
         <horizontal_fov>1.5707</horizontal_fov>
 
         <image>
           <width>50</width>
           <height>50</height>
-          <format>R8G8B8</format>
+          <format>L8</format>
         </image>
         <clip>
-          <near>0.8</near>
-          <far>100.0</far>
+          <near>0.5</near>
+          <far>10.0</far>
         </clip>
         <noise>
           <type>gaussian</type>
@@ -108,18 +108,18 @@
   <gazebo reference="dji_link">
     <sensor type="depth" name="depth_camera3">
       <pose>0 0 0 0 0 3.1415</pose>
-      <update_rate>5.0</update_rate>
-      <camera name="head">
+      <update_rate>3.0</update_rate>
+      <camera name="d3">
         <horizontal_fov>1.5707</horizontal_fov>
 
         <image>
           <width>50</width>
           <height>50</height>
-          <format>R8G8B8</format>
+          <format>L8</format>
         </image>
         <clip>
-          <near>0.8</near>
-          <far>100.0</far>
+          <near>0.5</near>
+          <far>10.0</far>
         </clip>
         <noise>
           <type>gaussian</type>
@@ -152,18 +152,18 @@
   <gazebo reference="dji_link">
     <sensor type="depth" name="depth_camera4">
       <pose>0 0 0 0 0 1.5707</pose>
-      <update_rate>5.0</update_rate>
-      <camera name="head">
+      <update_rate>3.0</update_rate>
+      <camera name="d4">
         <horizontal_fov>1.5707</horizontal_fov>
 
         <image>
           <width>50</width>
           <height>50</height>
-          <format>R8G8B8</format>
+          <format>L8</format>
         </image>
         <clip>
-          <near>0.8</near>
-          <far>100.0</far>
+          <near>0.5</near>
+          <far>10.0</far>
         </clip>
         <noise>
           <type>gaussian</type>
@@ -197,18 +197,18 @@
   <gazebo reference="dji_link">
     <sensor type="depth" name="depth_camera5">
       <pose>0 0 0 0 -1.5707 0</pose>
-      <update_rate>5.0</update_rate>
-      <camera name="head">
+      <update_rate>3.0</update_rate>
+      <camera name="d5">
         <horizontal_fov>1.5707</horizontal_fov>
 
         <image>
           <width>50</width>
           <height>50</height>
-          <format>R8G8B8</format>
+          <format>L8</format>
         </image>
         <clip>
-          <near>0.8</near>
-          <far>100.0</far>
+          <near>0.5</near>
+          <far>10.0</far>
         </clip>
         <noise>
           <type>gaussian</type>
@@ -242,18 +242,18 @@
   <gazebo reference="dji_link">
     <sensor type="depth" name="depth_camera6">
       <pose>0 0 0 0 1.5707 0</pose>
-      <update_rate>5.0</update_rate>
-      <camera name="head">
+      <update_rate>3.0</update_rate>
+      <camera name="d6">
         <horizontal_fov>1.5707</horizontal_fov>
 
         <image>
           <width>50</width>
           <height>50</height>
-          <format>R8G8B8</format>
+          <format>L8</format>
         </image>
         <clip>
-          <near>0.8</near>
-          <far>100.0</far>
+          <near>0.5</near>
+          <far>10.0</far>
         </clip>
         <noise>
           <type>gaussian</type>
