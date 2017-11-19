@@ -23,8 +23,8 @@
         <horizontal_fov>1.5707</horizontal_fov>
 
         <image>
-          <width>50</width>
-          <height>50</height>
+          <width>64</width>
+          <height>64</height>
           <format>L8</format>
         </image>
         <clip>
@@ -68,8 +68,8 @@
         <horizontal_fov>1.5707</horizontal_fov>
 
         <image>
-          <width>50</width>
-          <height>50</height>
+          <width>64</width>
+          <height>64</height>
           <format>L8</format>
         </image>
         <clip>
@@ -113,8 +113,8 @@
         <horizontal_fov>1.5707</horizontal_fov>
 
         <image>
-          <width>50</width>
-          <height>50</height>
+          <width>64</width>
+          <height>64</height>
           <format>L8</format>
         </image>
         <clip>
@@ -157,8 +157,8 @@
         <horizontal_fov>1.5707</horizontal_fov>
 
         <image>
-          <width>50</width>
-          <height>50</height>
+          <width>64</width>
+          <height>64</height>
           <format>L8</format>
         </image>
         <clip>
@@ -202,8 +202,8 @@
         <horizontal_fov>1.5707</horizontal_fov>
 
         <image>
-          <width>50</width>
-          <height>50</height>
+          <width>64</width>
+          <height>64</height>
           <format>L8</format>
         </image>
         <clip>
@@ -247,8 +247,8 @@
         <horizontal_fov>1.5707</horizontal_fov>
 
         <image>
-          <width>50</width>
-          <height>50</height>
+          <width>64</width>
+          <height>64</height>
           <format>L8</format>
         </image>
         <clip>
