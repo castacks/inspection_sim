@@ -18,13 +18,13 @@
   <gazebo reference="dji_link">
     <sensor type="depth" name="depth_camera1">
       <pose>0 0 0 0 0 0</pose>
-      <update_rate>3.0</update_rate>
+      <update_rate>6.0</update_rate>
       <camera name="d1">
         <horizontal_fov>1.5707</horizontal_fov>
 
         <image>
-          <width>64</width>
-          <height>64</height>
+          <width>32</width>
+          <height>32</height>
           <format>L8</format>
         </image>
         <clip>
@@ -44,7 +44,7 @@
         <alwaysOn>true</alwaysOn>
         <!-- <updateRate>20.0</updateRate> -->
         <cameraName>rrbot/camera1</cameraName>
-        <imageTopicName>image_raw</imageTopicName>
+        <!-- <imageTopicName>image_raw</imageTopicName> -->
         <depthImageTopicName>depth_1</depthImageTopicName>
         <cameraInfoTopicName>camera1_info</cameraInfoTopicName>
         <frameName>camera_link1</frameName>
@@ -63,13 +63,13 @@
   <gazebo reference="dji_link">
     <sensor type="depth" name="depth_camera2">
       <pose>0 0 0 0 0 -1.5707</pose>
-      <update_rate>3.0</update_rate>
+      <update_rate>6.0</update_rate>
       <camera name="d2">
         <horizontal_fov>1.5707</horizontal_fov>
 
         <image>
-          <width>64</width>
-          <height>64</height>
+          <width>32</width>
+          <height>32</height>
           <format>L8</format>
         </image>
         <clip>
@@ -89,7 +89,7 @@
         <alwaysOn>true</alwaysOn>
         <!-- <updateRate>20.0</updateRate> -->
         <cameraName>rrbot/camera2</cameraName>
-        <imageTopicName>image_raw</imageTopicName>
+        <!-- <imageTopicName>image_raw</imageTopicName> -->
         <depthImageTopicName>depth_2</depthImageTopicName>
         <cameraInfoTopicName>camera2_info</cameraInfoTopicName>
         <frameName>camera_link2</frameName>
@@ -108,13 +108,13 @@
   <gazebo reference="dji_link">
     <sensor type="depth" name="depth_camera3">
       <pose>0 0 0 0 0 3.1415</pose>
-      <update_rate>3.0</update_rate>
+      <update_rate>6.0</update_rate>
       <camera name="d3">
         <horizontal_fov>1.5707</horizontal_fov>
 
         <image>
-          <width>64</width>
-          <height>64</height>
+          <width>32</width>
+          <height>32</height>
           <format>L8</format>
         </image>
         <clip>
@@ -134,7 +134,7 @@
         <alwaysOn>true</alwaysOn>
         <!-- <updateRate>20.0</updateRate> -->
         <cameraName>rrbot/camera3</cameraName>
-        <imageTopicName>image_raw</imageTopicName>
+        <!-- <imageTopicName>image_raw</imageTopicName> -->
         <depthImageTopicName>depth_3</depthImageTopicName>
         <cameraInfoTopicName>camera3_info</cameraInfoTopicName>
         <frameName>camera_link3</frameName>
@@ -152,13 +152,13 @@
   <gazebo reference="dji_link">
     <sensor type="depth" name="depth_camera4">
       <pose>0 0 0 0 0 1.5707</pose>
-      <update_rate>3.0</update_rate>
+      <update_rate>6.0</update_rate>
       <camera name="d4">
         <horizontal_fov>1.5707</horizontal_fov>
 
         <image>
-          <width>64</width>
-          <height>64</height>
+          <width>32</width>
+          <height>32</height>
           <format>L8</format>
         </image>
         <clip>
@@ -178,7 +178,7 @@
         <alwaysOn>true</alwaysOn>
         <!-- <updateRate>20.0</updateRate> -->
         <cameraName>rrbot/camera4</cameraName>
-        <imageTopicName>image_raw</imageTopicName>
+        <!-- <imageTopicName>image_raw</imageTopicName> -->
         <depthImageTopicName>depth_4</depthImageTopicName>
         <cameraInfoTopicName>camera4_info</cameraInfoTopicName>
         <frameName>camera_link4</frameName>
@@ -197,13 +197,13 @@
   <gazebo reference="dji_link">
     <sensor type="depth" name="depth_camera5">
       <pose>0 0 0 0 -1.5707 0</pose>
-      <update_rate>3.0</update_rate>
+      <update_rate>6.0</update_rate>
       <camera name="d5">
         <horizontal_fov>1.5707</horizontal_fov>
 
         <image>
-          <width>64</width>
-          <height>64</height>
+          <width>32</width>
+          <height>32</height>
           <format>L8</format>
         </image>
         <clip>
@@ -223,7 +223,7 @@
         <alwaysOn>true</alwaysOn>
         <!-- <updateRate>20.0</updateRate> -->
         <cameraName>rrbot/camera5</cameraName>
-        <imageTopicName>image_raw</imageTopicName>
+        <!-- <imageTopicName>image_raw</imageTopicName> -->
         <depthImageTopicName>depth_5</depthImageTopicName>
         <cameraInfoTopicName>camera5_info</cameraInfoTopicName>
         <frameName>camera_link5</frameName>
@@ -242,13 +242,13 @@
   <gazebo reference="dji_link">
     <sensor type="depth" name="depth_camera6">
       <pose>0 0 0 0 1.5707 0</pose>
-      <update_rate>3.0</update_rate>
+      <update_rate>6.0</update_rate>
       <camera name="d6">
         <horizontal_fov>1.5707</horizontal_fov>
 
         <image>
-          <width>64</width>
-          <height>64</height>
+          <width>32</width>
+          <height>32</height>
           <format>L8</format>
         </image>
         <clip>
@@ -268,7 +268,7 @@
         <alwaysOn>true</alwaysOn>
         <!-- <updateRate>20.0</updateRate> -->
         <cameraName>rrbot/camera6</cameraName>
-        <imageTopicName>image_raw</imageTopicName>
+        <!-- <imageTopicName>image_raw</imageTopicName> -->
         <depthImageTopicName>depth_6</depthImageTopicName>
         <cameraInfoTopicName>camera6_info</cameraInfoTopicName>
         <frameName>camera_link6</frameName>

@@ -137,6 +137,5 @@ private:
     std::vector<double> _ang_vel_err_d_vec_x, _ang_vel_err_d_vec_y, _ang_vel_err_d_vec_z;
 
     double _vel_p, _vel_d;
-
 };
 #endif // ROBOT_H

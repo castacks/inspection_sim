@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <world name="default">
+    <scene>
+      <ambient>0.5 0.5 0.5 1</ambient>
+      <background>0.5 0.5 0.5 1</background>
+      <shadows>false</shadows>
+    </scene>
+    <physics type="ode">
+      <gravity>0 0 0</gravity>
+      <max_step_size>0.01</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>      
+    </physics>
+    
+    <!-- <include>
+      <uri>model://ground_plane</uri>
+    </include> -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    
+  </world>
+</sdf>

@@ -178,7 +178,6 @@ void RobotControl::reset(const geometry_msgs::Pose &msg)
     _ori_err_d_vec_y.empty();
     _ori_err_d_vec_z.empty();
     _err_count = 0;
-
 }
 
 void RobotControl::target_callback(const geometry_msgs::Pose::Ptr msg)
