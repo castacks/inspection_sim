@@ -48,21 +48,21 @@
 
   </link>
 
-  <!-- <joint name="hokuyo_joint" type="fixed"> -->
-    <!-- <parent link="dji_link"/> -->
-    <!-- <child link="hokuyo_link"/> -->
-    <!-- <origin xyz="0.0 0 ${height/2}" rpy="0 0 0"/> -->
-    <!-- <axis xyz="1 0 0"/> -->
-  <!-- </joint> -->
+  <joint name="hokuyo_joint" type="fixed">
+    <parent link="dji_link"/>
+    <child link="hokuyo_link"/>
+    <origin xyz="0.0 0 ${height/2}" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+  </joint>
 
   <!-- Hokuyo Laser -->
-  <!-- <link name="hokuyo_link"> -->
-    <!-- <collision> -->
-      <!-- <origin xyz="0 0 0.0" rpy="0 0 0"/> -->
-      <!-- <geometry> -->
-	    <!-- <box size="0.1 0.1 0.1"/> -->
-      <!-- </geometry> -->
-    <!-- </collision> -->
+  <link name="hokuyo_link">
+    <collision>
+      <origin xyz="0 0 0.0" rpy="0 0 0"/>
+      <geometry>
+	    <box size="0.1 0.1 0.1"/>
+      </geometry>
+    </collision>
 
     <!-- <visual> -->
       <!-- <origin xyz="0 0 0.0" rpy="0 0 0"/> -->
@@ -77,77 +77,6 @@
       <!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
       <!-- <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" /> -->
     <!-- </inertial> -->
-  <!-- </link> -->
-
-  <joint name="camera_joint1" type="fixed">
-    <parent link="dji_link"/>
-    <child link="camera_link1"/>
-    <origin xyz="0.0 0 0" rpy="-1.5707963 0 -1.5707963"/>
-    <axis xyz="1 0 0"/>
-  </joint>
-
-  <!-- depth_cam Laser -->
-  <link name="camera_link1">
-  
   </link>
 
-  <joint name="camera_joint2" type="fixed">
-    <parent link="dji_link"/>
-    <child link="camera_link2"/>
-    <origin xyz="0.0 0 0" rpy="-1.5707963 0 -3.1415"/>
-    <axis xyz="1 0 0"/>
-  </joint>
-
-  <!-- depth_cam Laser -->
-  <link name="camera_link2">
-  
-  </link>
-
-  <joint name="camera_joint3" type="fixed">
-    <parent link="dji_link"/>
-    <child link="camera_link3"/>
-    <origin xyz="0.0 0 0" rpy="-1.5707963 0 1.5707963"/>
-    <axis xyz="1 0 0"/>
-  </joint>
-
-  <!-- depth_cam Laser -->
-  <link name="camera_link3">  
-  </link>
-
-  <joint name="camera_joint4" type="fixed">
-    <parent link="dji_link"/>
-    <child link="camera_link4"/>
-    <origin xyz="0.0 0 0" rpy="-1.5707963 0 0"/>
-    <axis xyz="1 0 0"/>
-  </joint>
-
-
-  <!-- depth_cam Laser -->
-  <link name="camera_link4">
-  
-  </link>
-
-  <joint name="camera_joint5" type="fixed">
-    <parent link="dji_link"/>
-    <child link="camera_link5"/>
-    <origin xyz="0.0 0 0" rpy="0 0 -1.5707"/>
-    <axis xyz="1 0 0"/>
-  </joint>
-
-  <!-- depth_cam Laser -->
-  <link name="camera_link5">
-  
-  </link>
-
-    <joint name="camera_joint6" type="fixed">
-    <parent link="dji_link"/>
-    <child link="camera_link6"/>
-    <origin xyz="0.0 0 0" rpy="3.141592 0 -1.5707"/>
-    <axis xyz="1 0 0"/>
-  </joint>
-
-  <!-- depth_cam Laser -->
-  <link name="camera_link6">
-  
-  </link>
 </robot>
