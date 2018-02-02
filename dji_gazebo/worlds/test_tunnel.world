@@ -23,7 +23,7 @@
       </ode>      
       <max_step_size>0.01</max_step_size>
       <real_time_factor>1</real_time_factor>
-      <real_time_update_rate>1000</real_time_update_rate>      
+      <real_time_update_rate>300</real_time_update_rate>      
     </physics>
     
     <!-- <include>
@@ -34,18 +34,18 @@
     </include>
     
     <model name="bridge">
-      <pose>-4 -4 4 0 1.57079632679 0</pose>
+      <pose>-4 -4 4 0 0 0</pose>
       <static>true</static>
       <link name="body">
         <visual name="visual">
           <geometry>
-            <mesh><uri>file:///home/slz/inspection_ws/src/inspection_sim/dji_gazebo/models/test_tunnel.stl</uri><scale>0.01 0.01 0.01</scale></mesh>
+            <mesh><uri>file:///home/slz/inspection_ws/src/inspection_sim/dji_gazebo/models/tunnel_simple.stl</uri><scale>0.01 0.01 0.01</scale></mesh>
           </geometry>
         </visual>
         
         <collision name="collision">
           <geometry>	
-	        <mesh><uri>file:///home/slz/inspection_ws/src/inspection_sim/dji_gazebo/models/test_tunnel.stl</uri><scale>0.01 0.01 0.01</scale></mesh>
+	        <mesh><uri>file:///home/slz/inspection_ws/src/inspection_sim/dji_gazebo/models/tunnel_simple.stl</uri><scale>0.01 0.01 0.01</scale></mesh>
           </geometry>
         </collision>
       </link>
